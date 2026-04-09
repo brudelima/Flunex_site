@@ -364,6 +364,158 @@
     }
     .footer-cell:last-child { border-right: none; }
 
+    /* ============================================================
+       SECTION 2: INTRO
+       ============================================================ */
+    #intro-section {
+      background: var(--c-surface);
+      color: var(--c-primary);
+      padding: 12rem max(2rem, 5vw) 10rem;
+      position: relative;
+      z-index: 20;
+    }
+    .intro-grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: flex-start;
+    }
+    .intro-title {
+      font-family: var(--font-body);
+      font-size: clamp(2.5rem, 4vw, 3.8rem);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      margin: 0;
+      line-height: 1.1;
+      color: var(--c-primary);
+    }
+    .intro-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+      padding-top: 0.5rem;
+    }
+    .intro-desc {
+      font-family: var(--font-body);
+      font-size: clamp(1rem, 1.25vw, 1.3rem);
+      font-weight: 400;
+      line-height: 1.8;
+      color: rgba(42, 31, 47, 0.85);
+      max-width: 48ch;
+    }
+    .intro-meta {
+      border-top: 1px solid rgba(42, 31, 47, 0.12);
+      padding-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 3.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: rgba(42, 31, 47, 0.6);
+    }
+
+    /* ============================================================
+       SECTION 3: PAIN POINTS
+       ============================================================ */
+    #pain-section {
+      background: var(--c-surface); /* Continuous from section 2 */
+      color: var(--c-primary);
+      padding: 0 max(2rem, 5vw) 10rem;
+      position: relative;
+      z-index: 20;
+    }
+    .pain-header {
+      max-width: 1400px;
+      margin: 0 auto 5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 4rem;
+      border-bottom: 1px solid rgba(42, 31, 47, 0.1);
+      padding-bottom: 4rem;
+    }
+    .pain-title-wrap {
+      max-width: 650px;
+    }
+    .pain-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 5vw, 4.5rem);
+      line-height: 0.95;
+      text-transform: uppercase;
+      color: var(--c-primary);
+      margin: 0;
+    }
+    .pain-title .text-muted {
+      color: rgba(42, 31, 47, 0.4);
+    }
+    .pain-desc {
+      font-family: var(--font-body);
+      font-size: clamp(1.1rem, 1.25vw, 1.25rem);
+      font-weight: 300;
+      line-height: 1.7;
+      color: rgba(42, 31, 47, 0.8);
+      max-width: 420px;
+      margin: 0;
+    }
+
+    /* Grid Layout mimicking reference (Attached boxes) */
+    .pain-grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border: 1px solid rgba(42, 31, 47, 0.1);
+      border-radius: 4px;
+    }
+    .pain-card {
+      padding: 2.5rem 1.8rem;
+      border-right: 1px solid rgba(42, 31, 47, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      aspect-ratio: 4/5;
+      background: transparent;
+      transition: background 0.4s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+    /* Shine glass sweep effect from design_system3 */
+    .pain-card::before {
+      content: '';
+      position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(143,244,189,0.08), transparent);
+      transition: 0.6s var(--ease-out); pointer-events: none; z-index: 1;
+    }
+    .pain-card:last-child {
+      border-right: none;
+    }
+    .pain-card:hover {
+      background: rgba(42, 31, 47, 0.02);
+    }
+    .pain-card:hover::before { left: 100%; }
+    
+    .pain-card-icon {
+      width: 24px; height: 24px;
+      color: rgba(42, 31, 47, 0.3);
+      transition: color 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+    }
+    .pain-card:hover .pain-card-icon {
+      color: var(--c-accent);
+      transform: scale(1.1);
+    }
+    .pain-card-title {
+      font-family: var(--font-body);
+      font-size: clamp(1rem, 1.3vw, 1.35rem);
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--c-primary);
+      position: relative; z-index: 2;
+    }
+
     /* Tablets / Mobile */
     @media (max-width: 1024px) {
       #hero-content {
@@ -375,11 +527,22 @@
       #hero-text { max-width: 100%; }
       #hero-visuals { max-width: 600px; margin: 0 auto; width: 100%; }
       .hero-footer { display: none; }
+      
+      .intro-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .intro-meta { gap: 1.5rem; flex-wrap: wrap; }
+      
+      .pain-header { flex-direction: column; align-items: flex-start; gap: 2rem; }
+      .pain-grid { grid-template-columns: repeat(3, 1fr); border-right: none; }
+      .pain-card { border-bottom: 1px solid rgba(42, 31, 47, 0.1); }
+      .pain-card:nth-child(3n) { border-right: none; }
     }
     @media (max-width: 600px) {
       #hero-h1 { font-size: clamp(3rem, 12vw, 4rem); }
       .hero-actions { flex-direction: column; align-items: flex-start; }
       .visual-card { aspect-ratio: 4/3; }
+      
+      .pain-grid { grid-template-columns: 1fr; border-right: 1px solid rgba(42, 31, 47, 0.1); }
+      .pain-card { border-right: none; aspect-ratio: auto; min-height: 180px; }
     }
   </style>
 </head>
@@ -488,9 +651,64 @@
     </div>
   </section>
 
-  <!-- Dummy Section to show scrolling works -->
-  <section style="min-height: 100vh; background: var(--c-surface); display:flex; align-items:center; justify-content:center;">
-    <h2 style="font-family:var(--font-display); font-size:4rem; color:var(--c-primary); opacity:0.1;">Conteúdo Flunex</h2>
+  <!-- ============================================================
+       SECTION 2: INTRO
+       ============================================================ -->
+  <section id="intro-section">
+    <div class="intro-grid">
+      <div class="intro-left">
+        <h2 class="intro-title" id="intro-title">O que é a Flunex?</h2>
+      </div>
+      <div class="intro-right">
+        <div class="intro-content">
+          <p class="intro-desc" id="intro-desc">
+            Uma solução modular que organiza sua operação, automatiza o essencial e libera seu tempo para o que importa.
+          </p>
+          <div class="intro-meta" id="intro-meta">
+            <span>SISTEMA FLUNEX</span>
+            <span>ECOSSISTEMA 1.0</span>
+            <span>/ MÓDULOS INTELIGENTES</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 3: PAIN POINTS
+       ============================================================ -->
+  <section id="pain-section">
+    <div class="pain-header">
+      <div class="pain-title-wrap">
+        <h2 class="pain-title">Sua operação cresceu,<br><span class="text-muted">mas não saiu do improviso.</span></h2>
+      </div>
+      <p class="pain-desc">
+        Quando a operação não flui, tudo fica mais caro, lento e pesado. Inclusive o seu tempo.
+      </p>
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <svg class="pain-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 14L21 3m-4 8.5v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
+        <div class="pain-card-title">Processos<br>quebrados</div>
+      </div>
+      <div class="pain-card">
+        <svg class="pain-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        <div class="pain-card-title">Retrabalho<br>diário</div>
+      </div>
+      <div class="pain-card">
+        <svg class="pain-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        <div class="pain-card-title">Decisões<br>no escuro</div>
+      </div>
+      <div class="pain-card">
+        <svg class="pain-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <div class="pain-card-title">Tarefas manuais<br>demais</div>
+      </div>
+      <div class="pain-card">
+        <svg class="pain-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        <div class="pain-card-title">Sistemas que não<br>falam entre si</div>
+      </div>
+    </div>
   </section>
 
   <!-- ============================================================
@@ -587,6 +805,32 @@
           ease: 'power2.out',
           duration: 1
         });
+      });
+
+      // 5. Intro Section Animation
+      gsap.fromTo(['#intro-title', '#intro-desc', '#intro-meta'], {
+        y: 50, opacity: 0
+      }, {
+        y: 0, opacity: 1, duration: 1.2,
+        stagger: 0.15, ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#intro-section',
+          start: 'top 75%',
+          toggleActions: 'play none none reverse'
+        }
+      });
+
+      // 6. Pain Points Section Animation
+      gsap.fromTo(['.pain-header', '.pain-card'], {
+        y: 40, opacity: 0
+      }, {
+        y: 0, opacity: 1, duration: 1,
+        stagger: 0.1, ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#pain-section',
+          start: 'top 75%',
+          toggleActions: 'play none none reverse'
+        }
       });
 
     });
