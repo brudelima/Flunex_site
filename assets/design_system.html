@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Flunex - Design System</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+
+    <!-- Tailwind Config for Flunex Palette -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            main: '#2A1F2F',    // Berinjela Profundo
+                            accent: '#8FF4BD',  // Verde-Acento Suave
+                            base: '#E8E1D5',    // Areia Quente / Bege Técnico
+                            support: '#8C8C8C', // Cinza Grafite Suave
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Syncopate', 'sans-serif'],
+                        body: ['Manrope', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --c-main: #2A1F2F;
+            --c-accent: #8FF4BD;
+            --c-base: #E8E1D5;
+            --c-support: #8C8C8C;
+            --font-display: 'Syncopate', sans-serif;
+            --font-body: 'Manrope', sans-serif;
+            
+            --cursor-size: 20px;
+            --cursor-hover-size: 80px;
+        }
+
+        /* --- CORE --- */
+        body {
+            background-color: var(--c-base);
+            color: var(--c-main);
+            font-family: var(--font-body);
+            margin: 0;
+            overflow-x: hidden;
+            cursor: none;
+            opacity: 0; /* Preloader fade in */
+            selection: bg-[#8FF4BD]/50 text-[#2A1F2F];
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--c-base); }
+        ::-webkit-scrollbar-thumb { background: rgba(42, 31, 47, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--c-main); }
+
+        /* --- LAYOUT UTILS --- */
+        .wrapper {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- NOISE OVERLAY --- */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9000;
+            opacity: 0.15;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            mix-blend-mode: multiply;
+        }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor {
+            position: fixed; 
+            top: 0; left: 0;
+            width: var(--cursor-size); height: var(--cursor-size);
+            background-color: var(--c-main); 
+            border-radius: 50%;
+            pointer-events: none; 
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+        }
+        #cursor.hovered {
+            width: var(--cursor-hover-size); 
+            height: var(--cursor-hover-size);
+            background-color: var(--c-accent);
+            opacity: 0.8;
+            mix-blend-mode: difference;
+        }
+
+        /* --- PRELOADER --- */
+        .loader {
+            position: fixed;
+            inset: 0;
+            background: var(--c-base);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: var(--c-main);
+        }
+        .loader-text {
+            font-family: var(--font-display);
+            font-size: 4vw;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .loader-bar-wrap {
+            margin-top: 2rem;
+            width: 200px;
+            height: 2px;
+            background: rgba(42, 31, 47, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .loader-bar {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            background: var(--c-accent);
+            width: 0%;
+            box-shadow: 0 0 10px var(--c-accent);
+        }
+
+        /* --- BACKGROUND BLOBS --- */
+        .liquid-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            z-index: -1;
+            animation: float 12s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, -60px) scale(1.1); }
+        }
+
+        /* --- GLASS PANEL --- */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(42, 31, 47, 0.05);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-panel-dark {
+            background: rgba(42, 31, 47, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(143, 244, 189, 0.1);
+            color: var(--c-base);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+        .glass-panel:hover, .glass-panel-dark:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(143, 244, 189, 0.2);
+        }
+
+        /* --- TEXT REVEAL UTILS --- */
+        .word-wrap {
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: top;
+            padding-bottom: 0.1em;
+        }
+        .word-inner {
+            display: inline-block;
+            transform: translateY(110%);
+        }
+
+        /* --- SHINY CTA BUTTON (Adapted to Flunex) --- */
+        @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+        .shiny-cta {
+            --gradient-angle: 0deg;
+            position: relative;
+            overflow: hidden;
+            border-radius: 9999px;
+            padding: 1rem 2.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: var(--c-main);
+            background: linear-gradient(var(--c-accent), var(--c-accent)) padding-box,
+                        conic-gradient(from var(--gradient-angle), transparent 0%, #fff 5%, #fff 15%, transparent 30%, transparent 100%) border-box;
+            border: 2px solid transparent;            
+            box-shadow: 0 0 20px rgba(143, 244, 189, 0.4);
+            cursor: pointer;
+            animation: border-spin 3s linear infinite;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .shiny-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(143, 244, 189, 0.8);
+        }
+        @keyframes border-spin { to { --gradient-angle: 360deg; } }
+
+        /* --- CARD STACK (From parallax-clean) --- */
+        .card-item {
+            position: relative;
+            width: 100%;
+            margin-bottom: 5vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+        }
+        @media (max-width: 768px) {
+            .card-inner { grid-template-columns: 1fr; }
+            .card-img-wrap { order: -1; height: 300px; }
+        }
+
+        /* --- SECTION BASE --- */
+        .ds-section {
+            padding: 8rem 0;
+            border-bottom: 1px solid rgba(42, 31, 47, 0.1);
+        }
+        .ds-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+        .marker-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--c-support);
+            margin-bottom: 2rem;
+            display: block;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-accent selection:text-brand-main">
+
+    <!-- UTILS -->
+    <div id="cursor"></div>
+    <div class="noise-overlay"></div>
+    
+    <!-- BACKGROUND BLOBS -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+        <div class="liquid-blob bg-[#8FF4BD]" style="width: 600px; height: 600px; top: -150px; left: -100px; opacity: 0.3; animation-duration: 15s;"></div>
+        <div class="liquid-blob bg-[#2A1F2F]" style="width: 500px; height: 500px; bottom: -100px; right: -50px; opacity: 0.08; animation-duration: 20s; animation-delay: -5s;"></div>
+    </div>
+
+    <!-- PRELOADER -->
+    <div class="loader">
+        <div class="glass-panel px-6 py-2 rounded-full mb-6">
+            <span class="text-xs uppercase tracking-widest text-brand-main font-bold">FLUNEX</span>
+        </div>
+        <div class="loader-text">SYSTEM</div>
+        <div class="loader-bar-wrap rounded-full">
+            <div class="loader-bar rounded-full"></div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full p-6 z-50 mix-blend-difference text-[var(--c-base)]">
+        <div class="max-w-[1800px] mx-auto flex justify-between items-center glass-panel px-8 py-4 rounded-full" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+            <div class="font-display font-bold text-xl tracking-tighter text-brand-main mix-blend-normal">FLUNEX <span class="text-brand-accent text-sm">DS</span></div>
+            <div class="hidden md:flex gap-10 text-xs font-bold uppercase tracking-widest text-brand-main mix-blend-normal">
+                <a class="cursor-hover hover:text-brand-accent transition-colors relative group" href="#typography">
+                    Typography<span class="absolute -bottom-2 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a class="cursor-hover hover:text-brand-accent transition-colors relative group" href="#colors">
+                    Colors<span class="absolute -bottom-2 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a class="cursor-hover hover:text-brand-accent transition-colors relative group" href="#components">
+                    Components<span class="absolute -bottom-2 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a class="cursor-hover hover:text-brand-accent transition-colors relative group" href="#motion">
+                    Motion<span class="absolute -bottom-2 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 group-hover:w-full"></span>
+                </a>
+            </div>
+            <div class="md:hidden text-brand-main">MENU</div>
+        </div>
+    </nav>
+
+    <!-- WRAPPER -->
+    <div class="wrapper">
+
+        <!-- 0) HERO SECTION -->
+        <section class="min-h-screen relative flex items-center justify-center overflow-hidden pt-20">
+            <!-- Subtle Image parralax bg -->
+            <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=2670&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-[0.03] hero-img mix-blend-multiply" alt="Abstract Background" />
+            
+            <div class="relative z-10 text-center px-6 w-full max-w-7xl mx-auto flex flex-col items-center">
+                
+                <div class="mb-8 opacity-0 hero-fade">
+                    <div class="glass-panel inline-flex items-center gap-3 px-5 py-2 rounded-full border border-brand-accent/30 shadow-[0_0_15px_rgba(143,244,189,0.2)]">
+                        <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse shadow-[0_0_10px_#8FF4BD]"></span>
+                        <span class="text-xs uppercase tracking-[0.2em] text-brand-main font-bold">Automação & Minimalismo</span>
+                    </div>
+                </div>
+
+                <h1 class="font-display text-[10vw] leading-[0.85] font-bold text-brand-main drop-shadow-sm uppercase">
+                    <span class="split-animate block">FLUID</span>
+                    <span class="split-animate block text-transparent bg-clip-text bg-gradient-to-r from-brand-main to-brand-support mt-2">SYSTEM</span>
+                </h1>
+                
+                <p class="mt-10 text-lg md:text-2xl text-brand-support font-light max-w-2xl mx-auto leading-relaxed hero-fade opacity-0 tracking-wide">
+                    Um guia vivo de linguagem visual que utiliza o <span class="font-semibold text-brand-main border-b border-brand-accent pb-1">fluxo</span> para a inteligência aplicada.
+                </p>
+
+                <div class="mt-16 hero-fade opacity-0">
+                    <button class="shiny-cta cursor-hover" onclick="document.getElementById('typography').scrollIntoView();">
+                        Explorar Componentes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 hero-fade opacity-0">
+                <span class="text-[10px] uppercase tracking-[0.2em] text-brand-support font-bold">SCROLL</span>
+                <div class="w-px h-16 bg-gradient-to-b from-brand-main via-brand-main/50 to-transparent"></div>
+            </div>
+        </section>
+
+        <!-- 1) TYPOGRAPHY -->
+        <section id="typography" class="ds-section px-6 md:px-20 max-w-[1800px] mx-auto">
+            <span class="marker-text">01 / TYPOGRAPHY</span>
+            
+            <div class="space-y-16">
+                <!-- Heading 1 -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline pb-12 border-b border-brand-main/10">
+                    <div class="md:col-span-3 text-xs font-bold uppercase tracking-widest text-brand-support">Display H1</div>
+                    <div class="md:col-span-6">
+                        <h1 class="font-display text-5xl md:text-[5vw] leading-none text-brand-main font-bold uppercase">Berinjela</h1>
+                    </div>
+                    <div class="md:col-span-3 text-left md:text-right text-xs font-mono text-brand-support leading-relaxed">
+                        Font: Syncopate<br/>Weight: Bold (700)<br/>Usage: Large Hero Text
+                    </div>
+                </div>
+
+                <!-- Heading 2 -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline pb-12 border-b border-brand-main/10">
+                    <div class="md:col-span-3 text-xs font-bold uppercase tracking-widest text-brand-support">Heading H2</div>
+                    <div class="md:col-span-6">
+                        <h2 class="font-display text-4xl md:text-5xl uppercase text-brand-main tracking-tight">System Flow</h2>
+                    </div>
+                    <div class="md:col-span-3 text-left md:text-right text-xs font-mono text-brand-support leading-relaxed">
+                        Font: Syncopate<br/>Weight: Regular (400)<br/>Usage: Section Titles
+                    </div>
+                </div>
+
+                <!-- Heading 3 -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline pb-12 border-b border-brand-main/10">
+                    <div class="md:col-span-3 text-xs font-bold uppercase tracking-widest text-brand-support">Heading H3</div>
+                    <div class="md:col-span-6">
+                        <h3 class="font-body text-3xl font-bold text-brand-main">Inteligência Aplicada</h3>
+                    </div>
+                    <div class="md:col-span-3 text-left md:text-right text-xs font-mono text-brand-support leading-relaxed">
+                        Font: Manrope<br/>Weight: Bold (700)<br/>Usage: Cards / Modules
+                    </div>
+                </div>
+
+                <!-- Body Large -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline pb-12 border-b border-brand-main/10">
+                    <div class="md:col-span-3 text-xs font-bold uppercase tracking-widest text-brand-support">Body Large</div>
+                    <div class="md:col-span-6">
+                        <p class="font-body text-xl lg:text-2xl font-light leading-relaxed text-brand-main">
+                            Nós não construímos apenas interfaces. O fluxo orienta a inteligência onde a estética premium encontra a conversão real.
+                        </p>
+                    </div>
+                    <div class="md:col-span-3 text-left md:text-right text-xs font-mono text-brand-support leading-relaxed">
+                        Font: Manrope<br/>Weight: Light (300)<br/>Size: 20px / 24px
+                    </div>
+                </div>
+
+                <!-- Body Standard -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline pb-12 border-b border-brand-main/10">
+                    <div class="md:col-span-3 text-xs font-bold uppercase tracking-widest text-brand-support">Body Standard</div>
+                    <div class="md:col-span-6">
+                        <p class="font-body text-base font-normal leading-relaxed text-brand-support">
+                            Representa fluidez, automação e movimento inteligente. Utilizamos materiais visuais escaláveis para garantir performance sem perder o refinamento.
+                        </p>
+                    </div>
+                    <div class="md:col-span-3 text-left md:text-right text-xs font-mono text-brand-support leading-relaxed">
+                        Font: Manrope<br/>Weight: Normal (400)<br/>Size: 16px
+                    </div>
+                </div>
+
+                <!-- Micro / Labels -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline">
+                    <div class="md:col-span-3 text-xs font-bold uppercase tracking-widest text-brand-support">Labels & Micro</div>
+                    <div class="md:col-span-6">
+                        <span class="font-body text-[10px] uppercase tracking-[0.2em] text-brand-main font-bold py-1 px-2 border border-brand-main/20 rounded">Tags do Sistema</span>
+                    </div>
+                    <div class="md:col-span-3 text-left md:text-right text-xs font-mono text-brand-support leading-relaxed">
+                        Font: Manrope<br/>Weight: Bold (700)<br/>Size: 10px + Tracking
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2) COLORS -->
+        <section id="colors" class="ds-section px-6 md:px-20 max-w-[1800px] mx-auto">
+            <span class="marker-text">02 / COLORS & SURFACES</span>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Color 1 -->
+                <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between h-56 cursor-hover group">
+                    <div class="w-full h-20 rounded-xl bg-brand-main mb-4 shadow-lg group-hover:scale-[1.02] transition-transform"></div>
+                    <div>
+                        <div class="font-display text-sm font-bold text-brand-main">Berinjela Profundo</div>
+                        <div class="text-xs font-mono text-brand-support mt-1">#2A1F2F</div>
+                        <div class="text-[10px] mt-2 uppercase tracking-wide text-brand-support/70">Principal / Fundos / Textos</div>
+                    </div>
+                </div>
+
+                <!-- Color 2 -->
+                <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between h-56 cursor-hover group">
+                    <div class="w-full h-20 rounded-xl bg-brand-accent mb-4 shadow-[0_4px_20px_rgba(143,244,189,0.4)] group-hover:scale-[1.02] transition-transform"></div>
+                    <div>
+                        <div class="font-display text-sm font-bold text-brand-main">Verde Acento</div>
+                        <div class="text-xs font-mono text-brand-support mt-1">#8FF4BD</div>
+                        <div class="text-[10px] mt-2 uppercase tracking-wide text-brand-support/70">Fluxo / Acentos / Glow</div>
+                    </div>
+                </div>
+
+                <!-- Color 3 -->
+                <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between h-56 cursor-hover group mix-blend-normal">
+                    <div class="w-full h-20 rounded-xl bg-brand-base border border-brand-main/10 mb-4 shadow-sm group-hover:scale-[1.02] transition-transform"></div>
+                    <div>
+                        <div class="font-display text-sm font-bold text-brand-main">Areia / Bege Técnico</div>
+                        <div class="text-xs font-mono text-brand-support mt-1">#E8E1D5</div>
+                        <div class="text-[10px] mt-2 uppercase tracking-wide text-brand-support/70">Fundo Base / Equilíbrio</div>
+                    </div>
+                </div>
+
+                <!-- Color 4 -->
+                <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between h-56 cursor-hover group">
+                    <div class="w-full h-20 rounded-xl bg-brand-support mb-4 shadow-md group-hover:scale-[1.02] transition-transform"></div>
+                    <div>
+                        <div class="font-display text-sm font-bold text-brand-main">Cinza Grafite Suave</div>
+                        <div class="text-xs font-mono text-brand-support mt-1">#8C8C8C</div>
+                        <div class="text-[10px] mt-2 uppercase tracking-wide text-brand-support/70">Textos Secundários / Apoio</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 bg-brand-main rounded-2xl p-10 lg:p-16 text-brand-base relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-brand-accent rounded-full filter blur-[100px] opacity-20"></div>
+                
+                <h3 class="font-display text-2xl mb-4 relative z-10">Contraste Humano-Tech</h3>
+                <p class="font-body text-brand-support max-w-xl relative z-10 leading-relaxed font-light">
+                    O tom berinjela quando utilizado como superfície oferece um nível máximo de contraste moderno contra o Verde Fluido. 
+                    <br/><br/>
+                    <span class="text-brand-accent border-b border-brand-accent/30 pb-1 font-medium">Textos importantes usam o tom Bege para não cansar as vistas.</span>
+                </p>
+                
+                <div class="mt-8 flex gap-4 relative z-10">
+                    <div class="w-8 h-8 rounded-full bg-brand-accent shadow-[0_0_15px_#8FF4BD]"></div>
+                    <div class="w-8 h-8 rounded-full bg-brand-base"></div>
+                    <div class="w-8 h-8 rounded-full border border-brand-support text-brand-support flex items-center justify-center text-xs">AI</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3) UI COMPONENTS -->
+        <section id="components" class="ds-section px-6 md:px-20 max-w-[1800px] mx-auto">
+            <span class="marker-text">03 / UI COMPONENTS</span>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <!-- Group A: Buttons & Inputs -->
+                <div class="space-y-12">
+                    <h3 class="font-display text-2xl text-brand-main border-b border-brand-main/10 pb-4">Actions & Inputs</h3>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <div class="text-[10px] uppercase tracking-widest text-brand-support font-bold mb-4">Shiny CTA Button</div>
+                            <button class="shiny-cta cursor-hover shadow-lg">Start System</button>
+                        </div>
+
+                        <div>
+                            <div class="text-[10px] uppercase tracking-widest text-brand-support font-bold mb-4">Secondary Ghost</div>
+                            <button class="cursor-hover px-8 py-4 glass-panel rounded-full text-brand-main font-bold text-xs uppercase tracking-widest border border-brand-main hover:bg-brand-main hover:text-brand-base transition-all duration-300">
+                                View Documentation
+                            </button>
+                        </div>
+                        
+                        <div>
+                            <div class="text-[10px] uppercase tracking-widest text-brand-support font-bold mb-4">Icon Action</div>
+                            <button class="cursor-hover w-14 h-14 rounded-full bg-brand-main text-brand-accent flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-300">
+                                <span class="iconify" data-icon="lucide:arrow-right" data-width="24"></span>
+                            </button>
+                        </div>
+
+                        <div class="pt-6">
+                            <div class="text-[10px] uppercase tracking-widest text-brand-support font-bold mb-4">Text Input</div>
+                            <div class="relative max-w-sm">
+                                <input type="text" class="w-full bg-transparent border-b-2 border-brand-main/20 py-3 px-2 text-brand-main font-body text-lg focus:outline-none focus:border-brand-accent transition-colors placeholder-brand-support/50" placeholder="Type command...">
+                                <span class="iconify absolute right-2 top-4 text-brand-main/50" data-icon="lucide:search" data-width="20"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group B: Cards -->
+                <div class="space-y-12">
+                    <h3 class="font-display text-2xl text-brand-main border-b border-brand-main/10 pb-4">Cards & Patterns</h3>
+                    
+                    <!-- Dark Contrast Card -->
+                    <div class="glass-panel-dark p-8 rounded-3xl cursor-hover group relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-accent via-emerald-400 to-transparent transform -translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
+                        
+                        <div class="flex justify-between items-start mb-16">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-accent/20 flex items-center justify-center text-brand-accent border border-brand-accent/30">
+                                <span class="iconify" data-icon="lucide:layers" data-width="24"></span>
+                            </div>
+                            <span class="text-[10px] uppercase tracking-widest font-mono text-brand-support">Premium</span>
+                        </div>
+                        
+                        <h4 class="font-display text-xl text-brand-base mb-3 group-hover:text-brand-accent transition-colors">Aesthetic Focus</h4>
+                        <p class="font-body text-sm font-light text-brand-support leading-relaxed">
+                            Using deep eggplant backgrounds for containers ensures that accents glow vigorously, drawing the user's eye to conversion points.
+                        </p>
+                    </div>
+
+                    <!-- Stack Style Card -->
+                    <div class="card-item !h-auto !mb-0 cursor-hover group">
+                        <div class="card-inner rounded-3xl glass-panel !border-brand-main/10 hover:!border-brand-main/30">
+                            <div class="p-8 flex flex-col justify-between order-2 md:order-1">
+                                <div>
+                                    <div class="text-4xl font-display text-brand-main/10 font-bold mb-2">01</div>
+                                    <h4 class="text-2xl font-bold font-display text-brand-main mb-2">Fluxo Constante</h4>
+                                    <p class="text-sm font-body text-brand-support font-light leading-relaxed">Integração nativa com automações do cliente.</p>
+                                </div>
+                                <div class="mt-8">
+                                    <a href="#" class="text-xs uppercase font-bold tracking-widest text-brand-main border-b border-brand-main/30 pb-1 group-hover:border-brand-main group-hover:pr-4 transition-all duration-300 inline-block">
+                                        Explorar →
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="relative w-full h-[250px] md:h-full order-1 md:order-2 overflow-hidden bg-brand-main">
+                                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" class="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-1000" alt="Card feature" />
+                                <div class="absolute inset-0 bg-brand-main/20 group-hover:bg-transparent transition-colors duration-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4) ICONS E BADGES -->
+        <section class="ds-section px-6 md:px-20 max-w-[1800px] mx-auto border-b-0">
+            <span class="marker-text">04 / BADGES & ICONS</span>
+            
+            <div class="flex flex-wrap gap-12 items-center">
+                
+                <div class="flex flex-col gap-4">
+                    <span class="inline-flex items-center gap-2 bg-brand-main text-brand-accent px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-brand-main/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse"></span>
+                        Status: Active
+                    </span>
+                    <span class="inline-flex items-center gap-2 glass-panel border border-brand-main/20 text-brand-main px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                        System Label
+                    </span>
+                    <span class="inline-flex items-center justify-center w-8 h-8 bg-brand-accent text-brand-main rounded-md text-xs font-bold shadow-md">
+                        42
+                    </span>
+                </div>
+
+                <div class="w-px h-24 bg-brand-main/10 hidden md:block"></div>
+
+                <div class="flex gap-8 text-brand-main">
+                    <div class="flex flex-col items-center gap-2 cursor-hover hover:text-brand-accent transition-colors">
+                        <span class="iconify" data-icon="lucide:cpu" data-width="32"></span>
+                        <span class="text-[10px] font-mono text-brand-support">Core</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-hover hover:text-brand-accent transition-colors">
+                        <span class="iconify" data-icon="lucide:fingerprint" data-width="32"></span>
+                        <span class="text-[10px] font-mono text-brand-support">Auth</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-hover hover:text-brand-accent transition-colors">
+                        <span class="iconify" data-icon="lucide:zap" data-width="32"></span>
+                        <span class="text-[10px] font-mono text-brand-support">Speed</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-hover hover:text-brand-accent transition-colors">
+                        <span class="iconify" data-icon="lucide:workflow" data-width="32"></span>
+                        <span class="text-[10px] font-mono text-brand-support">Flow</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 5) MOTION (Text Reveal Replicado como Showcase) -->
+        <section id="motion" class="py-40 px-6 md:px-20 bg-brand-main text-brand-base flex flex-col items-center justify-center text-center relative overflow-hidden">
+            <!-- Background Liquid on dark section -->
+            <div class="absolute inset-0 z-0 opacity-10 blur-xl">
+                <div class="absolute top-10 left-20 w-96 h-96 bg-brand-accent rounded-full animate-pulse"></div>
+            </div>
+
+            <div class="relative z-10 max-w-4xl">
+                <div class="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-accent mb-8 split-animate">05 / Experiência e Movimento</div>
+                <h2 class="font-display text-4xl md:text-7xl leading-tight mb-12 uppercase split-animate">
+                    Design feito <br/><span class="text-brand-accent">para durar.</span>
+                </h2>
+                <div class="w-24 h-1 bg-brand-accent/30 mx-auto rounded-full"></div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-12 bg-brand-main text-brand-support text-center text-xs font-mono uppercase tracking-widest border-t border-brand-base/10">
+            © 2026 FLUNEX DESIGN SYSTEM. INTELIGÊNCIA EM CADA PIXEL.
+        </footer>
+
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // --- LENIS SCROLL ---
+            const lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                direction: 'vertical',
+                smooth: true,
+            });
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+
+            // --- CUSTOM CURSOR ---
+            const cursor = document.getElementById('cursor');
+            const hoverTargets = document.querySelectorAll('.cursor-hover, a, button, input');
+            
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`; // Adjusted for center
+            });
+
+            hoverTargets.forEach(target => {
+                target.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+                target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+            });
+
+            // --- TEXT SPLITTER UTILITY ---
+            function splitTextToWords(element) {
+                const text = element.innerText;
+                const words = text.split(' ');
+                element.innerHTML = '';
+                words.forEach(word => {
+                    const wordWrap = document.createElement('span');
+                    wordWrap.classList.add('word-wrap');
+                    wordWrap.innerHTML = `<span class="word-inner">${word}&nbsp;</span>`;
+                    element.appendChild(wordWrap);
+                });
+            }
+
+            document.querySelectorAll('.split-animate').forEach(el => {
+                splitTextToWords(el);
+            });
+
+            // --- LOADER ---
+            const loadTl = gsap.timeline({
+                onComplete: () => {
+                    document.body.style.opacity = 1;
+                    initSite();
+                }
+            });
+
+            loadTl.to('.loader-bar', { width: '100%', duration: 1.5, ease: 'power2.inOut' })
+                  .to('.loader-text', { y: -30, opacity: 0, duration: 0.5 }, "-=0.2")
+                  .to('.loader', { yPercent: -100, duration: 1.2, ease: 'power4.inOut' });
+
+            function initSite() {
+                // Hero Text Reveal
+                gsap.to('.hero-text span, h1 .word-inner', { 
+                    y: 0, 
+                    stagger: 0.1, 
+                    duration: 1.5, 
+                    ease: 'power4.out',
+                    onStart: function() {
+                        // Ensure elements are visible when animating
+                        gsap.set('h1 .word-inner', { opacity: 1 });
+                    }
+                });
+
+                // Hero Elements Fade In
+                gsap.to('.hero-fade', { opacity: 1, y: -20, duration: 1.5, stagger: 0.2, delay: 0.3, ease: 'power3.out' });
+                
+                // Hero Parallax effect
+                gsap.to('.hero-img', {
+                    yPercent: 20,
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: '.hero-img',
+                        start: 'top top',
+                        end: 'bottom top',
+                        scrub: true
+                    }
+                });
+
+                // Section Reveal Animations
+                const splitElements = document.querySelectorAll('.ds-section .split-animate, #motion .split-animate');
+                splitElements.forEach(el => {
+                    const words = el.querySelectorAll('.word-inner');
+                    gsap.to(words, {
+                        y: "0%",
+                        duration: 1.2,
+                        ease: "power4.out",
+                        stagger: 0.05,
+                        scrollTrigger: {
+                            trigger: el,
+                            start: "top 85%", 
+                            toggleActions: "play none none reverse"
+                        }
+                    });
+                });
+
+                // Animação de entrada dos cards e seções
+                const sections = document.querySelectorAll('.ds-section');
+                sections.forEach(sec => {
+                    gsap.from(sec, {
+                        opacity: 0, y: 50, duration: 1, ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: sec,
+                            start: "top 85%",
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

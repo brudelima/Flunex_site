@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>FLUNEX — Design System 3</title>
+  <meta name="description" content="Living design system Flunex: paleta Berinjela, Verde-Acento, Areia Quente e Grafite. Tipografia, cores, componentes e animações."/>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- Lenis smooth scroll -->
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+
+  <style>
+    /* ============================================================
+       FLUNEX DESIGN SYSTEM 3 — CORE TOKENS
+       ============================================================ */
+    :root {
+      /* Palette */
+      --c-primary:    #2A1F2F;  /* Berinjela Profundo */
+      --c-accent:     #8FF4BD;  /* Verde-Acento Suave */
+      --c-neutral-lt: #E8E1D5;  /* Areia Quente */
+      --c-neutral-dk: #8C8C8C;  /* Cinza Grafite */
+
+      /* Semantic aliases */
+      --c-bg:         var(--c-neutral-lt);
+      --c-surface:    #F4F0EA;
+      --c-text:       var(--c-primary);
+      --c-text-muted: var(--c-neutral-dk);
+      --c-border:     rgba(42, 31, 47, 0.12);
+      --c-border-alt: rgba(42, 31, 47, 0.06);
+
+      /* Derived */
+      --c-accent-dim: rgba(143, 244, 189, 0.18);
+      --c-primary-10: rgba(42, 31, 47, 0.10);
+      --c-primary-20: rgba(42, 31, 47, 0.20);
+      --c-primary-60: rgba(42, 31, 47, 0.60);
+      --c-glow:       rgba(143, 244, 189, 0.55);
+
+      /* Typography */
+      --font-display: 'Bebas Neue', 'Arial Narrow', sans-serif;
+      --font-body:    'Manrope', sans-serif;
+      --font-mono:    'Space Mono', monospace;
+
+      /* Timing */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       RESET / BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--c-bg);
+      color: var(--c-text);
+      font-family: var(--font-body);
+      margin: 0;
+      overflow-x: hidden;
+      opacity: 0; /* JS fade-in after preloader */
+    }
+
+    /* Noise overlay — subtle texture like parallax-clean */
+    .noise-overlay {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9000;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ============================================================
+       UTILS — TEXT REVEAL  (parallax-clean pattern)
+       ============================================================ */
+    .word-wrap {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: top;
+      padding-bottom: 0.12em;
+    }
+    .word-inner {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+
+    /* ============================================================
+       UTILS — CLIP REVEAL  (creative-agency pattern)
+       ============================================================ */
+    @keyframes columnReveal {
+      0%   { clip-path: inset(0 0 100% 0); opacity: 0; }
+      100% { clip-path: inset(0 0 0% 0);   opacity: 1; }
+    }
+    .col-anim {
+      animation: columnReveal 1.4s var(--ease-out) backwards;
+      will-change: clip-path;
+    }
+    .delay-1 { animation-delay: 0.10s; }
+    .delay-2 { animation-delay: 0.20s; }
+    .delay-3 { animation-delay: 0.35s; }
+    .delay-4 { animation-delay: 0.50s; }
+    .delay-5 { animation-delay: 0.65s; }
+
+    /* ============================================================
+       UTILS — FADE SLIDE IN  (creative-agency/lumina pattern)
+       ============================================================ */
+    @keyframes fadeSlideIn {
+      0%   { opacity: 0; transform: translateY(28px); filter: blur(6px); }
+      100% { opacity: 1; transform: translateY(0);    filter: blur(0);   }
+    }
+    .animate-on-scroll { animation-play-state: paused !important; }
+    .animate-on-scroll.animate { animation-play-state: running !important; }
+
+    /* ============================================================
+       UTILS — REVEAL  (glass-effect pattern)
+       ============================================================ */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease-in-out), transform 0.8s var(--ease-in-out); }
+    .reveal.active { opacity: 1; transform: translateY(0); }
+
+    /* ============================================================
+       PRELOADER
+       ============================================================ */
+    .loader {
+      position: fixed; inset: 0;
+      background: var(--c-primary);
+      z-index: 10000;
+      display: flex; justify-content: center; align-items: center;
+      color: var(--c-neutral-lt);
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .loader-text {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 5vw, 4rem);
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--c-neutral-lt);
+    }
+    .loader-accent {
+      font-size: clamp(0.6rem, 1.5vw, 0.9rem);
+      font-family: var(--font-mono);
+      letter-spacing: 0.3em;
+      color: var(--c-accent);
+      text-transform: uppercase;
+    }
+    .loader-bar {
+      position: absolute; bottom: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--c-primary), var(--c-accent));
+      width: 0%;
+    }
+
+    /* ============================================================
+       NAVIGATION
+       ============================================================ */
+    nav.flx-nav {
+      position: fixed; top: 0; width: 100%;
+      padding: 1.5rem 2.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 500;
+      mix-blend-mode: multiply;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.25em;
+      color: var(--c-primary);
+      text-transform: uppercase;
+    }
+    .nav-links {
+      display: flex; gap: 2.5rem;
+    }
+    .nav-links a {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--c-primary);
+      text-decoration: none;
+      position: relative;
+      transition: color 0.3s;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute; bottom: -4px; left: 0;
+      width: 0; height: 1px;
+      background: var(--c-accent);
+      transition: width 0.4s var(--ease-out);
+      box-shadow: 0 0 8px var(--c-glow);
+    }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* ============================================================
+       WRAPPER  (parallax-clean pattern — box shadow lifting)
+       ============================================================ */
+    .wrapper {
+      position: relative; z-index: 10;
+      background-color: var(--c-bg);
+      box-shadow: 0 50px 100px rgba(0,0,0,0.25);
+    }
+
+    /* ============================================================
+       SECTION LABELS
+       ============================================================ */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--c-neutral-dk);
+      margin-bottom: 3rem;
+    }
+    .section-label span {
+      color: var(--c-accent);
+      text-shadow: 0 0 12px var(--c-glow);
+    }
+
+    /* ============================================================
+       TYPOGRAPHY CLASSES
+       ============================================================ */
+    .display   { font-family: var(--font-display); }
+    .body-font { font-family: var(--font-body); }
+    .mono-font { font-family: var(--font-mono); }
+
+    /* ============================================================
+       HERO — SECTION 0
+       ============================================================ */
+    .hero-section {
+      height: 100svh;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Large animated mesh background */
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 40%, rgba(143,244,189,0.18) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 50% at 80% 60%, rgba(42,31,47,0.10)   0%, transparent 60%),
+        var(--c-bg);
+      z-index: 0;
+    }
+
+    /* Animated stripes behind hero */
+    .hero-stripes {
+      position: absolute; inset: 0; z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .hero-stripes::before {
+      content: '';
+      position: absolute;
+      top: -40%; left: -20%;
+      width: 140%; height: 200%;
+      background: repeating-linear-gradient(
+        -55deg,
+        transparent 0,
+        transparent 60px,
+        rgba(42, 31, 47, 0.03) 60px,
+        rgba(42, 31, 47, 0.03) 61px
+      );
+      animation: stripeMove 28s linear infinite;
+    }
+    @keyframes stripeMove {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(61px, 61px); }
+    }
+
+    /* Floating accent orb */
+    .hero-orb {
+      position: absolute;
+      width: min(50vw, 500px);
+      height: min(50vw, 500px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(143,244,189,0.25) 0%, transparent 70%);
+      filter: blur(60px);
+      right: -5%;
+      bottom: -10%;
+      z-index: 0;
+      animation: orbFloat 12s ease-in-out infinite alternate;
+    }
+    @keyframes orbFloat {
+      0%   { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-30px, -40px) scale(1.12); }
+    }
+
+    /* Vertical rule left side */
+    .hero-rule {
+      position: absolute;
+      left: 2.5rem;
+      top: 15vh; bottom: 15vh;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--c-accent), transparent);
+      opacity: 0.5;
+      z-index: 1;
+    }
+
+    /* Hero content */
+    .hero-content {
+      position: relative; z-index: 2;
+      text-align: left;
+      max-width: 1400px;
+      width: 100%;
+      padding: 0 clamp(1.5rem, 6vw, 7rem);
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--c-accent);
+      text-shadow: 0 0 14px var(--c-glow);
+      margin-bottom: 1.5rem;
+      opacity: 0; /* animated */
+    }
+    .hero-heading {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 10vw, 11rem);
+      line-height: 0.92;
+      letter-spacing: 0.04em;
+      color: var(--c-primary);
+      margin: 0;
+      overflow: hidden;
+      font-weight: 400; /* Bebas Neue only has 400 */
+    }
+    .hero-heading span.line {
+      display: block;
+      overflow: hidden;
+    }
+    .hero-heading span.line .inner {
+      display: block;
+      transform: translateY(110%);
+    }
+    .hero-heading .accent-word {
+      color: transparent;
+      -webkit-text-stroke: 2px var(--c-primary);
+      font-weight: 400;
+    }
+    .hero-sub {
+      margin-top: 2.5rem;
+      font-size: clamp(0.85rem, 1.5vw, 1rem);
+      font-weight: 400;
+      color: var(--c-text-muted);
+      letter-spacing: 0.04em;
+      max-width: 42ch;
+      opacity: 0;
+      line-height: 1.7;
+    }
+    .hero-ctas {
+      margin-top: 3rem;
+      display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;
+      opacity: 0;
+    }
+
+    /* Hero scroll indicator */
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      z-index: 2; opacity: 0;
+    }
+    .hero-scroll span {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--c-neutral-dk);
+    }
+    .hero-scroll-line {
+      width: 1px; height: 3.5rem;
+      background: linear-gradient(to bottom, var(--c-accent), transparent);
+      box-shadow: 0 0 8px var(--c-glow);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 1; transform: scaleY(1); }
+      50%       { opacity: 0.4; transform: scaleY(0.7); }
+    }
+
+    /* ============================================================
+       BUTTONS
+       ============================================================ */
+
+    /* ─── btn-primary: filled + glow border spin ─── */
+    .btn-primary {
+      --gradient-angle: 0deg;
+      position: relative;
+      overflow: hidden;
+      border-radius: 0; /* angular, like parallax-clean */
+      padding: 0.9rem 2.2rem;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c-neutral-lt);
+      background: var(--c-primary);
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+      isolation: isolate;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.6rem;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: conic-gradient(
+        from var(--gradient-angle),
+        transparent 0deg, var(--c-accent) 60deg,
+        transparent 120deg, rgba(143,244,189,0.4) 200deg,
+        transparent 260deg, var(--c-accent) 310deg,
+        transparent 360deg
+      );
+      border-radius: inherit;
+      padding: 1.5px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: rotateBorder 3s linear infinite;
+    }
+    @keyframes rotateBorder { to { --gradient-angle: 360deg; } }
+    @property --gradient-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+    .btn-primary::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 40% at 50% 110%, var(--c-glow) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .btn-primary:hover::after { opacity: 1; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(143,244,189,0.28); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ─── btn-ghost: outline on light bg ─── */
+    .btn-ghost {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.9rem 2.2rem;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c-primary);
+      border: 1.5px solid var(--c-border);
+      background: transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.35s var(--ease-out);
+      overflow: hidden;
+    }
+    .btn-ghost::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--c-primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s var(--ease-out);
+      z-index: 0;
+    }
+    .btn-ghost span { position: relative; z-index: 1; }
+    .btn-ghost:hover { color: var(--c-neutral-lt); border-color: var(--c-primary); }
+    .btn-ghost:hover::before { transform: scaleX(1); }
+
+    /* ─── btn-accent: green fill ─── */
+    .btn-accent {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.9rem 2.2rem;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c-primary);
+      background: var(--c-accent);
+      border: none; cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.25s, box-shadow 0.3s;
+      overflow: hidden;
+    }
+    /* Particle dots inside btn-accent (lumina pattern) */
+    .btn-accent .points_wrapper {
+      overflow: hidden; width: 100%; height: 100%;
+      pointer-events: none; position: absolute; inset: 0; z-index: 1;
+    }
+    .btn-accent .points_wrapper .point {
+      bottom: -6px; position: absolute;
+      animation: floatUp infinite ease-in-out;
+      pointer-events: none;
+      width: 2px; height: 2px;
+      background-color: var(--c-primary);
+      border-radius: 9999px;
+      opacity: 0.5;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0); opacity: 0.6; }
+      85%  { opacity: 0; }
+      100% { transform: translateY(-50px); opacity: 0; }
+    }
+    .btn-accent .points_wrapper .point:nth-child(1) { left:10%; animation-duration:2.1s; animation-delay:0.2s; }
+    .btn-accent .points_wrapper .point:nth-child(2) { left:30%; animation-duration:2.4s; animation-delay:0.5s; }
+    .btn-accent .points_wrapper .point:nth-child(3) { left:55%; animation-duration:1.9s; animation-delay:0.1s; }
+    .btn-accent .points_wrapper .point:nth-child(4) { left:75%; animation-duration:2.2s; }
+    .btn-accent .points_wrapper .point:nth-child(5) { left:90%; animation-duration:1.7s; animation-delay:0.8s; }
+    .btn-accent .inner-label { position: relative; z-index: 2; }
+    .btn-accent:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(143,244,189,0.5); }
+
+    /* ─── btn-text: underline link ─── */
+    .btn-text {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-display);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--c-primary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--c-border);
+      padding-bottom: 3px;
+      transition: border-color 0.3s, color 0.3s;
+      cursor: pointer; background: none; border-top: none; border-left: none; border-right: none;
+    }
+    .btn-text:hover { border-color: var(--c-accent); color: var(--c-accent); }
+    .btn-text svg { transition: transform 0.3s; }
+    .btn-text:hover svg { transform: translateX(4px); }
+
+    /* ─── btn-big-link: large cta like parallax footer ─── */
+    .btn-big-link {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 6vw, 5rem);
+      font-weight: 700;
+      color: var(--c-primary);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      transition: color 0.3s, letter-spacing 0.4s var(--ease-out);
+      display: inline-block;
+    }
+    .btn-big-link:hover { color: var(--c-accent); letter-spacing: 0.05em; text-shadow: 0 0 40px var(--c-glow); }
+
+    /* ============================================================
+       CARDS
+       ============================================================ */
+
+    /* ─── Project card (parallax-clean stack) ─── */
+    .card-inner {
+      background: var(--c-primary);
+      border: 1px solid rgba(232,225,213,0.1);
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(42,31,47,0.3);
+      transition: box-shadow 0.4s;
+    }
+    .card-inner:hover { box-shadow: 0 30px 80px rgba(42,31,47,0.45); }
+    .card-content {
+      padding: 3rem;
+      display: flex; flex-direction: column; justify-content: space-between;
+      background: var(--c-primary);
+      z-index: 2;
+    }
+    .card-img-wrap { position: relative; overflow: hidden; }
+    .card-img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 1.4s var(--ease-out);
+    }
+    .card-inner:hover .card-img { transform: scale(1.08); }
+
+    .card-num {
+      font-family: var(--font-display);
+      font-size: 3rem; font-weight: 700;
+      color: rgba(232,225,213,0.15);
+      margin-bottom: 0.6rem;
+    }
+    .card-title { font-size: 1.5rem; font-weight: 700; color: var(--c-neutral-lt); }
+    .card-location {
+      font-size: 0.65rem; text-transform: uppercase;
+      letter-spacing: 0.25em; color: var(--c-accent);
+      margin-top: 0.5rem;
+      text-shadow: 0 0 10px var(--c-glow);
+    }
+    .card-desc { color: var(--c-neutral-dk); font-weight: 300; font-size: 0.875rem; line-height: 1.7; }
+
+    /* ─── Glass service card (glass-effect) ─── */
+    .glass-card {
+      background: rgba(232,225,213,0.55);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border-top: 1px solid rgba(232,225,213,0.9);
+      border-left: 1px solid rgba(232,225,213,0.5);
+      border-right: 1px solid rgba(232,225,213,0.3);
+      border-bottom: 1px solid rgba(232,225,213,0.2);
+      box-shadow: 0 8px 32px rgba(42,31,47,0.10);
+      position: relative; overflow: hidden;
+      transition: all 0.45s var(--ease-out);
+    }
+    .glass-card::before {
+      content: '';
+      position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(143,244,189,0.08), transparent);
+      transition: 0.55s; pointer-events: none; z-index: 1;
+    }
+    .glass-card:hover {
+      background: rgba(232,225,213,0.75);
+      border-color: rgba(143,244,189,0.35);
+      transform: translateY(-5px);
+      box-shadow: 0 16px 48px rgba(42,31,47,0.16);
+    }
+    .glass-card:hover::before { left: 100%; }
+
+    /* ─── Feature list card (creative-agency) ─── */
+    .feature-card {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      position: relative; overflow: hidden;
+      transition: background 0.3s, transform 0.25s;
+      cursor: default;
+    }
+    .feature-card__bar {
+      position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+      background: var(--c-accent);
+      transform: scaleY(0); transform-origin: top;
+      box-shadow: 0 0 12px var(--c-glow);
+      transition: transform 0.35s var(--ease-out);
+    }
+    .feature-card:hover .feature-card__bar { transform: scaleY(1); }
+    .feature-card:hover { background: rgba(143,244,189,0.06); }
+    .feature-card:hover .feature-num { color: var(--c-accent); }
+    .feature-card:hover h4 { transform: translateX(6px); }
+    .feature-num {
+      font-family: var(--font-mono); font-size: 0.6rem;
+      color: var(--c-neutral-dk); transition: color 0.3s;
+    }
+    .feature-card h4 {
+      font-weight: 600; font-size: 0.9rem;
+      color: var(--c-primary);
+      transition: transform 0.3s var(--ease-out);
+    }
+    .feature-arrow {
+      width: 16px; height: 16px; color: var(--c-neutral-dk);
+      transition: color 0.3s, transform 0.3s;
+    }
+    .feature-card:hover .feature-arrow { color: var(--c-accent); transform: rotate(-45deg); }
+
+    /* ─── Corner-accent card (creative-agency tech card) ─── */
+    .corner-card {
+      background: var(--c-surface);
+      border: 1px dashed var(--c-border);
+      position: relative;
+      padding: 2rem;
+      transition: border-color 0.4s;
+    }
+    .corner-card:hover { border-color: rgba(143,244,189,0.45); }
+    .corner-card::before,
+    .corner-card::after,
+    .corner-card > .corner-br,
+    .corner-card > .corner-bl {
+      content: '';
+      position: absolute; width: 10px; height: 10px;
+    }
+    .corner-card::before  { top:0; left:0; border-top:2px solid var(--c-accent); border-left:2px solid var(--c-accent); }
+    .corner-card::after   { top:0; right:0; border-top:2px solid var(--c-accent); border-right:2px solid var(--c-accent); }
+    .corner-card > .corner-bl { bottom:0; left:0; border-bottom:2px solid var(--c-accent); border-left:2px solid var(--c-accent); }
+    .corner-card > .corner-br { bottom:0; right:0; border-bottom:2px solid var(--c-accent); border-right:2px solid var(--c-accent); }
+
+    /* ============================================================
+       INPUTS
+       ============================================================ */
+    .input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .input-group input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1.5px solid var(--c-border);
+      padding: 0.75rem 0;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--c-primary);
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .input-group input:focus { border-color: var(--c-accent); }
+    .input-group label {
+      position: absolute; top: 0.75rem; left: 0;
+      font-size: 0.75rem; color: var(--c-neutral-dk);
+      transition: all 0.3s;
+      pointer-events: none;
+      text-transform: uppercase; letter-spacing: 0.15em;
+    }
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+      top: -0.8rem; font-size: 0.6rem; color: var(--c-accent);
+    }
+    .input-group .input-line {
+      position: absolute; bottom: 0; left: 0; width: 0; height: 1.5px;
+      background: var(--c-accent);
+      box-shadow: 0 0 8px var(--c-glow);
+      transition: width 0.4s var(--ease-out);
+    }
+    .input-group input:focus ~ .input-line { width: 100%; }
+
+    /* ============================================================
+       BADGES / TAGS
+       ============================================================ */
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.6rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.15em;
+    }
+    .badge-primary { background: var(--c-primary); color: var(--c-neutral-lt); }
+    .badge-accent  { background: rgba(143,244,189,0.2); color: var(--c-accent); border: 1px solid rgba(143,244,189,0.35); box-shadow: 0 0 10px var(--c-accent-dim); }
+    .badge-neutral { background: var(--c-surface); color: var(--c-neutral-dk); border: 1px solid var(--c-border); }
+    .badge-pulse span.dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--c-accent);
+      box-shadow: 0 0 8px var(--c-glow);
+      animation: pulseDot 2s ease-in-out infinite;
+    }
+    @keyframes pulseDot { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:0.5;} }
+    .tag-item {
+      display: inline-flex;
+      padding: 0.25rem 0.75rem;
+      border: 1px solid var(--c-border);
+      font-family: var(--font-mono); font-size: 0.6rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--c-neutral-dk);
+      transition: color 0.3s, border-color 0.3s;
+      cursor: default;
+    }
+    .tag-item:hover { color: var(--c-accent); border-color: rgba(143,244,189,0.4); box-shadow: 0 0 8px var(--c-accent-dim); }
+
+    /* ============================================================
+       TOOLTIP
+       ============================================================ */
+    .has-tooltip { position: relative; display: inline-block; }
+    .tooltip-box {
+      position: absolute; bottom: calc(100% + 10px); left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: var(--c-primary); color: var(--c-neutral-lt);
+      font-family: var(--font-mono); font-size: 0.6rem;
+      padding: 0.4rem 0.7rem; white-space: nowrap;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 100;
+      letter-spacing: 0.08em;
+    }
+    .tooltip-box::after {
+      content: '';
+      position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--c-primary);
+    }
+    .has-tooltip:hover .tooltip-box {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
+
+    /* ============================================================
+       MODAL BACKDROP
+       ============================================================ */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(42,31,47,0.55);
+      backdrop-filter: blur(8px);
+      z-index: 800;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.94) translateY(16px);
+      background: var(--c-bg);
+      border: 1px solid var(--c-border);
+      padding: 2.5rem 3rem;
+      max-width: 480px; width: calc(100% - 2rem);
+      box-shadow: 0 24px 80px rgba(42,31,47,0.35);
+      transition: transform 0.4s var(--ease-out);
+    }
+    .modal-backdrop.open .modal-box {
+      transform: translate(-50%, -50%) scale(1) translateY(0);
+    }
+    .modal-close {
+      position: absolute; top:1.25rem; right:1.25rem;
+      background:none; border:none; cursor:pointer;
+      color: var(--c-neutral-dk);
+      font-size: 1.25rem; line-height: 1;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--c-primary); }
+
+    /* ============================================================
+       CARD STACK  (parallax-clean pattern)
+       ============================================================ */
+    .stack-section {
+      padding: 10vh 0;
+      background: var(--c-primary);
+      color: var(--c-neutral-lt);
+      position: relative;
+    }
+    .stack-container {
+      width: 100%; max-width: 1400px; margin: 0 auto;
+      position: relative; padding-bottom: 10vh;
+    }
+    .card-item {
+      position: sticky; top: 10vh;
+      height: 78vh; width: 100%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 4vh;
+    }
+    @media (max-width: 768px) {
+      .card-inner { grid-template-columns: 1fr; }
+      .card-item { top: 5vh; height: 85vh; }
+      .card-img-wrap { height: 45%; order: -1; }
+      .card-content { padding: 1.75rem; }
+    }
+
+    /* ============================================================
+       SECTION BACKGROUNDS / ANIMATED BG
+       ============================================================ */
+
+    /* Floating blobs (glass-effect pattern adapted) */
+    .liquid-blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); z-index: 0;
+      animation: blobFloat 12s infinite alternate var(--ease-in-out);
+    }
+    @keyframes blobFloat {
+      0%   { transform: translate(0,0) scale(1); }
+      100% { transform: translate(28px, 44px) scale(1.08); }
+    }
+
+    /* Falling beams (lumina pattern adapted) */
+    @keyframes beamFall {
+      0%   { transform: translateY(-100%); opacity: 0; }
+      5%   { opacity: 0.6; }
+      50%  { opacity: 1; }
+      95%  { opacity: 0.6; }
+      100% { transform: translateY(120vh); opacity: 0; }
+    }
+    .beam-1 { animation: beamFall 7s linear infinite; }
+    .beam-2 { animation: beamFall 9s linear infinite 2s; }
+    .beam-3 { animation: beamFall 8s linear infinite 4.5s; }
+
+    /* Grid lines decoration */
+    .grid-lines {
+      position: absolute; inset: 0; pointer-events: none;
+      display: flex; z-index: 0;
+    }
+    .grid-line {
+      flex: 1; border-left: 1px solid rgba(232,225,213,0.06);
+      position: relative; overflow: hidden;
+    }
+
+    /* Animated section separator */
+    .flx-divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, transparent, var(--c-accent), transparent);
+      box-shadow: 0 0 12px var(--c-glow);
+      opacity: 0.4;
+    }
+
+    /* ============================================================
+       ICONS DISPLAY
+       ============================================================ */
+    .icon-cell {
+      display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+      padding: 1.5rem 1rem;
+      border: 1px solid var(--c-border);
+      transition: border-color 0.3s, background 0.3s;
+      cursor: default;
+    }
+    .icon-cell:hover {
+      border-color: rgba(143,244,189,0.4);
+      background: rgba(143,244,189,0.06);
+    }
+    .icon-cell:hover svg { stroke: var(--c-accent); filter: drop-shadow(0 0 6px var(--c-glow)); }
+    .icon-cell svg { transition: stroke 0.3s, filter 0.3s; }
+    .icon-cell span { font-family: var(--font-mono); font-size: 0.55rem; color: var(--c-neutral-dk); letter-spacing: 0.1em; }
+
+    /* ============================================================
+       MOTION DEMOS
+       ============================================================ */
+    .motion-demo {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      padding: 2rem;
+      position: relative;
+    }
+    .motion-title {
+      font-family: var(--font-display);
+      font-size: 0.65rem; letter-spacing: 0.2em;
+      color: var(--c-neutral-dk);
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ─── Banner slide animation (glass-effect) ─── */
+    @keyframes slideRight { 0%{transform:translateX(-15%);} 100%{transform:translateX(0%);} }
+    @keyframes slideLeft  { 0%{transform:translateX(0%);} 100%{transform:translateX(-15%);} }
+    .motion-banner-r { animation: slideRight 5s ease-in-out infinite alternate; }
+    .motion-banner-l { animation: slideLeft  6s ease-in-out infinite alternate; }
+
+    /* ─── Spin border ─── */
+    .spin-border {
+      width: 80px; height: 80px;
+      border: 2px solid transparent;
+      border-top-color: var(--c-accent);
+      border-radius: 50%;
+      animation: spinAnim 1.4s linear infinite;
+      box-shadow: 0 0 12px var(--c-glow);
+    }
+    @keyframes spinAnim { to { transform: rotate(360deg); } }
+
+    /* ─── Pulse block ─── */
+    .pulse-block {
+      width: 80px; height: 80px;
+      background: var(--c-accent);
+      border-radius: 4px;
+      animation: pulseBlock 2s ease-in-out infinite;
+      box-shadow: 0 0 0 0 var(--c-glow);
+    }
+    @keyframes pulseBlock {
+      0%,100% { transform: scale(1); box-shadow: 0 0 0 0 var(--c-glow); }
+      50%      { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(143,244,189,0); }
+    }
+
+    /* ─── Shimmer ─── */
+    @keyframes shimmerAnim { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .flx-footer {
+      background: var(--c-primary);
+      color: var(--c-neutral-lt);
+      padding: 8rem 2.5rem 4rem;
+      position: relative; overflow: hidden;
+      text-align: center;
+    }
+    .footer-glow {
+      position: absolute; top: -20%;
+      left: 50%; transform: translateX(-50%);
+      width: 800px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(143,244,189,0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .footer-sub {
+      font-family: var(--font-mono);
+      font-size: 0.6rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--c-neutral-dk);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ============================================================
+       COLOR SWATCHES
+       ============================================================ */
+    .swatch {
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .swatch-block {
+      height: 110px; border-radius: 0;
+      border: 1px solid rgba(0,0,0,0.06);
+      position: relative; overflow: hidden;
+    }
+    .swatch-block.primary   { background: var(--c-primary); }
+    .swatch-block.accent    { background: var(--c-accent); }
+    .swatch-block.neutral-lt{ background: var(--c-neutral-lt); border-color: rgba(0,0,0,0.12); }
+    .swatch-block.neutral-dk{ background: var(--c-neutral-dk); }
+    .swatch-block.surface   { background: var(--c-surface);  border-color: rgba(0,0,0,0.12); }
+    .swatch-block.gradient-1{ background: linear-gradient(135deg, var(--c-primary), var(--c-accent)); }
+    .swatch-block.gradient-2{ background: linear-gradient(135deg, var(--c-neutral-lt), var(--c-accent)); }
+    .swatch-name { font-size: 0.75rem; font-weight: 600; color: var(--c-primary); }
+    .swatch-hex  { font-family: var(--font-mono); font-size: 0.6rem; color: var(--c-neutral-dk); }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 768px) {
+      .nav-links a:not(:last-child) { display: none; }
+      .hero-heading { font-size: clamp(2.5rem, 12vw, 6rem); }
+    }
+
+    /* ============================================================
+       GRADIENT BLUR (creative-agency progressive blur)
+       ============================================================ */
+    .gradient-blur {
+      position: fixed; z-index: 5; inset: 0 0 auto 0;
+      height: 100px; pointer-events: none;
+    }
+    .gradient-blur > div, .gradient-blur::before, .gradient-blur::after {
+      position: absolute; inset: 0;
+    }
+    .gradient-blur::before { content:""; z-index:1; backdrop-filter:blur(0.5px); mask:linear-gradient(to top,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 12.5%,rgba(0,0,0,1) 25%,rgba(0,0,0,0) 37.5%); }
+    .gradient-blur > div:nth-of-type(1) { z-index:2; backdrop-filter:blur(1px); mask:linear-gradient(to top,rgba(0,0,0,0) 12.5%,rgba(0,0,0,1) 25%,rgba(0,0,0,1) 37.5%,rgba(0,0,0,0) 50%); }
+    .gradient-blur > div:nth-of-type(2) { z-index:3; backdrop-filter:blur(2px); mask:linear-gradient(to top,rgba(0,0,0,0) 25%,rgba(0,0,0,1) 37.5%,rgba(0,0,0,1) 50%,rgba(0,0,0,0) 62.5%); }
+    .gradient-blur > div:nth-of-type(3) { z-index:4; backdrop-filter:blur(4px); mask:linear-gradient(to top,rgba(0,0,0,0) 37.5%,rgba(0,0,0,1) 50%,rgba(0,0,0,1) 62.5%,rgba(0,0,0,0) 75%); }
+    .gradient-blur > div:nth-of-type(4) { z-index:5; backdrop-filter:blur(8px); mask:linear-gradient(to top,rgba(0,0,0,0) 50%,rgba(0,0,0,1) 62.5%,rgba(0,0,0,1) 75%,rgba(0,0,0,0) 87.5%); }
+    .gradient-blur > div:nth-of-type(5) { z-index:6; backdrop-filter:blur(16px); mask:linear-gradient(to top,rgba(0,0,0,0) 62.5%,rgba(0,0,0,1) 75%,rgba(0,0,0,1) 87.5%,rgba(0,0,0,0) 100%); }
+    .gradient-blur::after { content:""; z-index:8; backdrop-filter:blur(32px); mask:linear-gradient(to top,rgba(0,0,0,0) 87.5%,rgba(0,0,0,1) 100%); }
+
+    /* Type scale table */
+    .ds-spec-row td { padding: 1.5rem 0; vertical-align: middle; border-bottom: 1px solid var(--c-border-alt); }
+
+  </style>
+</head>
+
+<body>
+  <!-- ============================================================
+       NOISE + GRADIENT BLUR
+       ============================================================ -->
+  <div class="noise-overlay"></div>
+  <div class="gradient-blur">
+    <div></div><div></div><div></div><div></div><div></div>
+  </div>
+
+  <!-- ============================================================
+       PRELOADER
+       ============================================================ -->
+  <div class="loader" id="loader">
+    <div class="loader-text">FLUNEX</div>
+    <div class="loader-accent">Design System 3.0</div>
+    <div class="loader-bar" id="loader-bar"></div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="flx-nav" id="main-nav">
+    <div class="nav-logo">FLUNEX</div>
+    <div class="nav-links hidden md:flex">
+      <a href="#typography">Tipografia</a>
+      <a href="#colors">Cores</a>
+      <a href="#components">Componentes</a>
+      <a href="#motion">Motion</a>
+      <a href="#icons">Ícones</a>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       WRAPPER
+       ============================================================ -->
+  <div class="wrapper">
+
+    <!-- ============================================================
+         0) HERO
+         ============================================================ -->
+    <section class="hero-section" id="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-stripes"></div>
+      <div class="hero-orb"></div>
+      <div class="hero-rule"></div>
+
+      <!-- Animated vertical grid lines (lumina style) -->
+      <div class="grid-lines" style="opacity:0.5;">
+        <div class="grid-line"></div>
+        <div class="grid-line" style="position:relative; overflow:hidden;">
+          <span class="beam-1" style="position:absolute;top:0;left:50%;width:1px;height:80px;background:linear-gradient(to bottom,transparent,var(--c-accent),transparent);"></span>
+        </div>
+        <div class="grid-line" style="position:relative; overflow:hidden;">
+          <span class="beam-2" style="position:absolute;top:0;left:50%;width:1px;height:100px;background:linear-gradient(to bottom,transparent,var(--c-accent),transparent);"></span>
+        </div>
+        <div class="grid-line"></div>
+        <div class="grid-line" style="border-right:1px solid rgba(42,31,47,0.06);"></div>
+      </div>
+
+      <div class="hero-content">
+        <!-- Badge eyebrow -->
+        <div class="hero-eyebrow" id="hero-eyebrow">
+          <span style="color:var(--c-accent)">●</span>&nbsp; Design System 3.0 — Flunex
+        </div>
+
+        <!-- Main heading -->
+        <h1 class="hero-heading" id="hero-heading">
+          <span class="line"><span class="inner">DESIGN</span></span>
+          <span class="line"><span class="inner">SEM&nbsp;<span class="accent-word">LIMITE</span></span></span>
+        </h1>
+
+        <!-- Sub -->
+        <p class="hero-sub" id="hero-sub">
+          Um sistema vivo de design que reúne tipografia, paleta, componentes animados
+          e padrões de motion para construir experiências memoráveis.
+        </p>
+
+        <!-- CTAs -->
+        <div class="hero-ctas" id="hero-ctas">
+          <a href="#typography" class="btn-primary">
+            Explorar Sistema
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+          <a href="#components" class="btn-ghost"><span>Ver Componentes</span></a>
+
+          <!-- Accent badge -->
+          <div class="badge badge-accent badge-pulse" style="margin-left:0.5rem;">
+            <span class="dot"></span>
+            Sistema Ativo
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div style="margin-top:3.5rem; display:flex; gap:3rem; flex-wrap:wrap; opacity:0;" id="hero-stats">
+          <div>
+            <div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--c-primary);">06</div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);">Seções</div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--c-primary);">04</div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);">Cores Base</div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--c-accent);text-shadow:0 0 20px var(--c-glow);">12+</div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);">Componentes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="hero-scroll" id="hero-scroll">
+        <span>Scroll</span>
+        <div class="hero-scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         1) TYPOGRAPHY
+         ============================================================ -->
+    <section id="typography" style="padding:8rem 0; border-bottom:1px solid var(--c-border);">
+      <div style="max-width:1400px;margin:0 auto;padding:0 clamp(1.5rem,6vw,7rem);">
+        <div class="section-label"><span>01</span> / Tipografia</div>
+
+        <!-- Font families -->
+        <div style="margin-bottom:4rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:2rem;">
+          <div class="corner-card reveal">
+            <div class="corner-bl"></div><div class="corner-br"></div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);margin-bottom:0.75rem;">Display — Syncopate</div>
+            <div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--c-primary);letter-spacing:-0.01em;">ABCDEFG</div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);margin-top:0.5rem;">Google Fonts · 400, 700</div>
+          </div>
+          <div class="corner-card reveal">
+            <div class="corner-bl"></div><div class="corner-br"></div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);margin-bottom:0.75rem;">Body — Manrope</div>
+            <div style="font-family:var(--font-body);font-size:1.5rem;font-weight:400;color:var(--c-primary);">Fluidez e Clareza</div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);margin-top:0.5rem;">Google Fonts · 300–800</div>
+          </div>
+          <div class="corner-card reveal">
+            <div class="corner-bl"></div><div class="corner-br"></div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);margin-bottom:0.75rem;">Mono — Space Mono</div>
+            <div style="font-family:var(--font-mono);font-size:1.2rem;color:var(--c-primary);">01 / System</div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);margin-top:0.5rem;">Google Fonts · 400, 700</div>
+          </div>
+        </div>
+
+        <!-- Full type scale -->
+        <table style="width:100%;border-collapse:separate;border-spacing:0;">
+          <tbody>
+            <!-- H1 -->
+            <tr>
+              <td style="width:160px;padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:middle;">H1 / Hero</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);vertical-align:middle;">
+                <h1 class="display split-animate" style="font-size:clamp(2.5rem,6vw,6rem);line-height:0.92;letter-spacing:-0.01em;color:var(--c-primary);margin:0;">CONCRETE DREAMS</h1>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);vertical-align:middle;white-space:nowrap;">Syncopate / 700<br>6vw / LS -0.01</td>
+            </tr>
+            <!-- H2 -->
+            <tr>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:middle;">H2 / Section</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);">
+                <h2 class="display split-animate" style="font-size:clamp(1.8rem,4vw,4rem);letter-spacing:0;color:var(--c-primary);margin:0;">RECENT WORK</h2>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);white-space:nowrap;">Syncopate / 700<br>4vw / LS 0</td>
+            </tr>
+            <!-- H3 -->
+            <tr>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:middle;">H3 / Sub</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);">
+                <h3 style="font-family:var(--font-body);font-size:1.75rem;font-weight:700;color:var(--c-primary);margin:0;">Automação Inteligente</h3>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);white-space:nowrap;">Manrope / 700<br>28px / LH 1.3</td>
+            </tr>
+            <!-- H4 -->
+            <tr>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:middle;">H4 / Card</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);">
+                <h4 style="font-family:var(--font-body);font-size:1.2rem;font-weight:600;color:var(--c-primary);margin:0;">Fluxo de Dados em Tempo Real</h4>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);white-space:nowrap;">Manrope / 600<br>19px / LH 1.4</td>
+            </tr>
+            <!-- H5 -->
+            <tr>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:middle;">H5</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);">
+                <h5 style="font-family:var(--font-body);font-size:1rem;font-weight:600;color:var(--c-primary);margin:0;text-transform:uppercase;letter-spacing:0.1em;">CATEGORIA / 2025</h5>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);white-space:nowrap;">Manrope / 600<br>16px / Uppercase</td>
+            </tr>
+            <!-- H6 -->
+            <tr>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:middle;">H6 / Label</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);">
+                <h6 style="font-family:var(--font-mono);font-size:0.65rem;font-weight:700;color:var(--c-neutral-dk);margin:0;letter-spacing:0.25em;text-transform:uppercase;">[ 01. SISTEMA ]</h6>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);white-space:nowrap;">Space Mono / 700<br>10px / LS 0.25em</td>
+            </tr>
+            <!-- Body LG -->
+            <tr>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:top;padding-top:2rem;">Body LG</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);">
+                <p style="font-family:var(--font-body);font-size:1.15rem;font-weight:300;line-height:1.75;color:var(--c-text-muted);margin:0;max-width:60ch;">Acreditamos que tecnologia e estética podem coexistir com sofisticação. Cada pixel foi pensado para criar uma experiência fluida e impactante.</p>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);white-space:nowrap;vertical-align:top;padding-top:2rem;">Manrope / 300<br>18px / LH 1.75</td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:top;padding-top:2rem;">Body</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);">
+                <p style="font-family:var(--font-body);font-size:0.9rem;font-weight:400;line-height:1.7;color:var(--c-text-muted);margin:0;max-width:60ch;">Nossa filosofia é enraizada na crença de que interfaces devem envelhecer com elegância. Usamos padrões que evoluem, registrando o progresso do tempo.</p>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);white-space:nowrap;vertical-align:top;padding-top:2rem;">Manrope / 400<br>14px / LH 1.7</td>
+            </tr>
+            <!-- Body SM -->
+            <tr>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:middle;">Body SM</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);">
+                <p style="font-family:var(--font-body);font-size:0.75rem;font-weight:400;line-height:1.6;color:var(--c-neutral-dk);margin:0;">Legenda, metadado ou texto auxiliar. Usado para contexto secundário.</p>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);white-space:nowrap;">Manrope / 400<br>12px / LH 1.6</td>
+            </tr>
+            <!-- Gradient Text -->
+            <tr>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);vertical-align:middle;">Gradient</td>
+              <td style="padding:1.5rem 2rem;border-bottom:1px solid var(--c-border-alt);">
+                <span class="display" style="font-size:clamp(1.5rem,4vw,4rem);font-weight:700;background:linear-gradient(135deg,var(--c-primary) 0%,var(--c-accent) 60%,var(--c-primary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:gradShift 4s linear infinite;">FLUNEX</span>
+                <style>@keyframes gradShift{0%{background-position:0%50%}50%{background-position:100%50%}100%{background-position:0%50%}}</style>
+              </td>
+              <td style="padding:1.5rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;text-align:right;color:var(--c-neutral-dk);white-space:nowrap;">Syncopate / 700<br>Gradient + animation</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         2) COLORS
+         ============================================================ -->
+    <section id="colors" style="padding:8rem 0;border-bottom:1px solid var(--c-border);background:var(--c-surface);position:relative;overflow:hidden;">
+      <!-- Ambient blob -->
+      <div class="liquid-blob" style="background:var(--c-accent);width:400px;height:400px;right:-100px;top:-80px;opacity:0.12;animation-duration:15s;"></div>
+      <div class="liquid-blob" style="background:var(--c-primary);width:350px;height:350px;left:-80px;bottom:-60px;opacity:0.07;animation-duration:20s;animation-delay:-8s;"></div>
+
+      <div style="max-width:1400px;margin:0 auto;padding:0 clamp(1.5rem,6vw,7rem);position:relative;z-index:1;">
+        <div class="section-label"><span>02</span> / Sistema de Cores</div>
+
+        <!-- Core swatches -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.5rem;margin-bottom:3.5rem;">
+          <div class="swatch reveal">
+            <div class="swatch-block primary"></div>
+            <div class="swatch-name">Berinjela Profundo</div>
+            <div class="swatch-hex">#2A1F2F</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);margin-top:0.25rem;">rgb(42,31,47) · hsl(289°,15%,15%)</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">Primária · Fundos · Hero</div>
+          </div>
+          <div class="swatch reveal">
+            <div class="swatch-block accent" style="box-shadow:0 0 30px rgba(143,244,189,0.3);"></div>
+            <div class="swatch-name">Verde-Acento Suave</div>
+            <div class="swatch-hex">#8FF4BD</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);margin-top:0.25rem;">rgb(143,244,189) · hsl(150°,86%,76%)</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">Acento · Glow · Motion</div>
+          </div>
+          <div class="swatch reveal">
+            <div class="swatch-block neutral-lt"></div>
+            <div class="swatch-name">Areia Quente</div>
+            <div class="swatch-hex">#E8E1D5</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);margin-top:0.25rem;">rgb(232,225,213) · hsl(38°,26%,87%)</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">Neutro claro · BG · Texto inv.</div>
+          </div>
+          <div class="swatch reveal">
+            <div class="swatch-block neutral-dk"></div>
+            <div class="swatch-name">Cinza Grafite</div>
+            <div class="swatch-hex">#8C8C8C</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);margin-top:0.25rem;">rgb(140,140,140) · hsl(0°,0%,55%)</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">Suporte · Texto secundário</div>
+          </div>
+          <div class="swatch reveal">
+            <div class="swatch-block surface"></div>
+            <div class="swatch-name">Superfície</div>
+            <div class="swatch-hex">#F4F0EA</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);margin-top:0.25rem;">rgb(244,240,234) — derivada</div>
+            <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">Cards · Seções suaves</div>
+          </div>
+        </div>
+
+        <!-- Opacity variants -->
+        <div style="margin-bottom:3.5rem;" class="reveal">
+          <div style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--c-neutral-dk);margin-bottom:1.25rem;">Variantes de Opacidade — Berinjela</div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <div style="flex:1;min-width:60px;height:60px;background:rgba(42,31,47,1);display:flex;align-items:flex-end;padding:0.5rem;"><span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-lt);">100%</span></div>
+            <div style="flex:1;min-width:60px;height:60px;background:rgba(42,31,47,0.8);display:flex;align-items:flex-end;padding:0.5rem;"><span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-lt);">80%</span></div>
+            <div style="flex:1;min-width:60px;height:60px;background:rgba(42,31,47,0.6);display:flex;align-items:flex-end;padding:0.5rem;"><span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-lt);">60%</span></div>
+            <div style="flex:1;min-width:60px;height:60px;background:rgba(42,31,47,0.4);display:flex;align-items:flex-end;padding:0.5rem;border:1px solid var(--c-border);"><span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-primary);">40%</span></div>
+            <div style="flex:1;min-width:60px;height:60px;background:rgba(42,31,47,0.2);display:flex;align-items:flex-end;padding:0.5rem;border:1px solid var(--c-border);"><span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-primary);">20%</span></div>
+            <div style="flex:1;min-width:60px;height:60px;background:rgba(42,31,47,0.1);display:flex;align-items:flex-end;padding:0.5rem;border:1px solid var(--c-border);"><span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-primary);">10%</span></div>
+          </div>
+        </div>
+
+        <!-- Gradients -->
+        <div style="margin-bottom:3.5rem;">
+          <div style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--c-neutral-dk);margin-bottom:1.25rem;">Gradientes</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;">
+            <div class="swatch reveal">
+              <div class="swatch-block gradient-1" style="height:90px;"></div>
+              <div class="swatch-hex">Primária → Acento (135°)</div>
+            </div>
+            <div class="swatch reveal">
+              <div class="swatch-block gradient-2" style="height:90px;"></div>
+              <div class="swatch-hex">Areia → Acento (135°)</div>
+            </div>
+            <div class="swatch reveal">
+              <div style="height:90px;background:radial-gradient(ellipse at 30% 60%, rgba(143,244,189,0.35) 0%, var(--c-neutral-lt) 65%);border:1px solid var(--c-border);"></div>
+              <div class="swatch-hex">Radial Verde sobre Areia</div>
+            </div>
+            <div class="swatch reveal">
+              <div style="height:90px;background:linear-gradient(to right,var(--c-primary),rgba(42,31,47,0.5) 40%,transparent);border:1px solid var(--c-border);"></div>
+              <div class="swatch-hex">Primária → Transparente</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Semantic roles table -->
+        <div class="reveal" style="overflow-x:auto;">
+          <div style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--c-neutral-dk);margin-bottom:1.25rem;">Papéis Semânticos</div>
+          <table style="width:100%;border-collapse:separate;border-spacing:0;min-width:600px;">
+            <thead>
+              <tr>
+                <th style="font-family:var(--font-mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);text-align:left;padding:0.75rem 1rem 0.75rem 0;border-bottom:1px solid var(--c-border);">Token</th>
+                <th style="font-family:var(--font-mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);text-align:left;padding:0.75rem 1rem;border-bottom:1px solid var(--c-border);">Cor</th>
+                <th style="font-family:var(--font-mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);text-align:left;padding:0.75rem 1rem;border-bottom:1px solid var(--c-border);">Uso</th>
+                <th style="font-family:var(--font-mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-dk);text-align:left;padding:0.75rem 0 0.75rem 1rem;border-bottom:1px solid var(--c-border);">Contraste</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:1rem 1rem 1rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.65rem;">--c-primary</td><td style="padding:1rem;border-bottom:1px solid var(--c-border-alt);"><span style="display:inline-block;width:16px;height:16px;background:var(--c-primary);border-radius:2px;vertical-align:middle;margin-right:6px;"></span><span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">#2A1F2F</span></td><td style="padding:1rem;border-bottom:1px solid var(--c-border-alt);font-size:0.75rem;color:var(--c-text-muted);">Texto principal, fundos escuros, hero, nav</td><td style="padding:1rem 0 1rem 1rem;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;color:var(--c-accent);">AAA sobre areia</td></tr>
+              <tr><td style="padding:1rem 1rem 1rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.65rem;">--c-accent</td><td style="padding:1rem;border-bottom:1px solid var(--c-border-alt);"><span style="display:inline-block;width:16px;height:16px;background:var(--c-accent);border-radius:2px;vertical-align:middle;margin-right:6px;box-shadow:0 0 8px rgba(143,244,189,0.5);"></span><span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">#8FF4BD</span></td><td style="padding:1rem;border-bottom:1px solid var(--c-border-alt);font-size:0.75rem;color:var(--c-text-muted);">CTAs, glow, linhas, indicadores, hover</td><td style="padding:1rem 0 1rem 1rem;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">AA sobre primária</td></tr>
+              <tr><td style="padding:1rem 1rem 1rem 0;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.65rem;">--c-neutral-lt</td><td style="padding:1rem;border-bottom:1px solid var(--c-border-alt);"><span style="display:inline-block;width:16px;height:16px;background:var(--c-neutral-lt);border-radius:2px;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,0.1);"></span><span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">#E8E1D5</span></td><td style="padding:1rem;border-bottom:1px solid var(--c-border-alt);font-size:0.75rem;color:var(--c-text-muted);">BG, texto sobre escuro, seções suaves</td><td style="padding:1rem 0 1rem 1rem;border-bottom:1px solid var(--c-border-alt);font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">AAA sobre primária</td></tr>
+              <tr><td style="padding:1rem 1rem 1rem 0;font-family:var(--font-mono);font-size:0.65rem;">--c-neutral-dk</td><td style="padding:1rem;"><span style="display:inline-block;width:16px;height:16px;background:var(--c-neutral-dk);border-radius:2px;vertical-align:middle;margin-right:6px;"></span><span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">#8C8C8C</span></td><td style="padding:1rem;font-size:0.75rem;color:var(--c-text-muted);">Texto secundário, ícones, metadados</td><td style="padding:1rem 0 1rem 1rem;font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">AA sobre areia</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         3) UI COMPONENTS
+         ============================================================ -->
+    <section id="components" style="padding:8rem 0;border-bottom:1px solid var(--c-border);">
+      <div style="max-width:1400px;margin:0 auto;padding:0 clamp(1.5rem,6vw,7rem);">
+        <div class="section-label"><span>03</span> / Componentes UI</div>
+
+        <!-- BUTTONS -->
+        <h3 class="display" style="font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);margin:0 0 2rem;">Botões</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:1.25rem;align-items:center;margin-bottom:4rem;">
+          <button class="btn-primary">Primário</button>
+          <a href="#" class="btn-ghost"><span>Fantasma</span></a>
+          <button class="btn-accent">
+            <div class="points_wrapper">
+              <i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+            </div>
+            <span class="inner-label">Acento</span>
+          </button>
+          <button class="btn-text">
+            Ver mais
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+          <a href="#" class="btn-big-link">LET'S TALK</a>
+        </div>
+
+        <!-- CARDS GRID -->
+        <h3 class="display" style="font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);margin:0 0 2rem;">Cards</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-bottom:4rem;">
+
+          <!-- Glass card -->
+          <div class="glass-card" style="padding:2rem;border-radius:0;">
+            <div style="width:48px;height:48px;background:var(--c-accent-dim);border:1px solid rgba(143,244,189,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;">
+              <svg width="20" height="20" fill="none" stroke="var(--c-accent)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h4 style="font-weight:700;font-size:1rem;color:var(--c-primary);margin:0 0 0.5rem;">Card Glass</h4>
+            <p style="font-size:0.8rem;color:var(--c-text-muted);margin:0;line-height:1.6;">Efeito glassmorphism adaptado ao tema claro. Hover revela shimmer de acento.</p>
+          </div>
+
+          <!-- Feature list card -->
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <div class="feature-card">
+              <div class="feature-card__bar"></div>
+              <div>
+                <div class="feature-num">01</div>
+                <h4>Automação de Fluxo</h4>
+              </div>
+              <svg class="feature-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+            <div class="feature-card">
+              <div class="feature-card__bar"></div>
+              <div>
+                <div class="feature-num">02</div>
+                <h4>Inteligência Aplicada</h4>
+              </div>
+              <svg class="feature-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+            <div class="feature-card">
+              <div class="feature-card__bar"></div>
+              <div>
+                <div class="feature-num">03</div>
+                <h4>Análise em Tempo Real</h4>
+              </div>
+              <svg class="feature-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+
+          <!-- Corner accent card -->
+          <div class="corner-card" style="display:flex;flex-direction:column;justify-content:space-between;min-height:200px;">
+            <div class="corner-bl"></div><div class="corner-br"></div>
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px dashed var(--c-border);padding-bottom:1rem;margin-bottom:1rem;">
+                <span style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--c-accent);text-shadow:0 0 10px var(--c-glow);">[ Status do Sistema ]</span>
+                <div class="badge badge-accent badge-pulse"><span class="dot"></span>Online</div>
+              </div>
+              <p style="font-size:0.8rem;color:var(--c-text-muted);line-height:1.6;">Card técnico com cantos decorativos em acento. Ideal para dashboards e painéis de controle.</p>
+            </div>
+            <button class="btn-text">Ver detalhes
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- INPUTS -->
+        <h3 class="display" style="font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);margin:0 0 2rem;">Inputs</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;max-width:760px;margin-bottom:4rem;">
+          <div>
+            <div class="input-group">
+              <input type="text" placeholder=" " id="inp1"/>
+              <label for="inp1">Nome completo</label>
+              <div class="input-line"></div>
+            </div>
+            <div class="input-group">
+              <input type="email" placeholder=" " id="inp2"/>
+              <label for="inp2">E-mail</label>
+              <div class="input-line"></div>
+            </div>
+          </div>
+          <div>
+            <div class="input-group">
+              <input type="text" placeholder=" " id="inp3" value="Exemplo preenchido"/>
+              <label for="inp3">Campo preenchido</label>
+              <div class="input-line"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BADGES -->
+        <h3 class="display" style="font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);margin:0 0 2rem;">Badges & Tags</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-bottom:4rem;">
+          <div class="badge badge-primary">Primária</div>
+          <div class="badge badge-accent badge-pulse"><span class="dot"></span>Acento Ativo</div>
+          <div class="badge badge-neutral">Neutro</div>
+          <span class="tag-item">Design</span>
+          <span class="tag-item">Motion</span>
+          <span class="tag-item">Flunex</span>
+        </div>
+
+        <!-- TOOLTIP DEMO -->
+        <h3 class="display" style="font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);margin:0 0 2rem;">Tooltip & Modal</h3>
+        <div style="display:flex;gap:2rem;align-items:center;flex-wrap:wrap;margin-bottom:2.5rem;">
+          <div class="has-tooltip">
+            <button class="btn-ghost"><span>Hover para Tooltip</span></button>
+            <div class="tooltip-box">Dica contextual do sistema</div>
+          </div>
+          <button class="btn-primary" id="modal-trigger">
+            Abrir Modal
+          </button>
+        </div>
+
+        <!-- NAV DEMO -->
+        <h3 class="display" style="font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);margin:0 0 2rem;">Navbar</h3>
+        <div style="background:var(--c-primary);padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:4rem;">
+          <div style="font-family:var(--font-display);font-size:0.9rem;font-weight:700;letter-spacing:0.2em;color:var(--c-neutral-lt);">FLUNEX</div>
+          <div style="display:flex;gap:2rem;">
+            <a href="#" style="font-family:var(--font-body);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-lt);text-decoration:none;opacity:0.7;transition:opacity 0.2s;" onmouseenter="this.style.opacity='1';this.style.color='var(--c-accent)';this.style.textShadow='0 0 10px var(--c-glow)'" onmouseleave="this.style.opacity='0.7';this.style.color='var(--c-neutral-lt)';this.style.textShadow='none'">Work</a>
+            <a href="#" style="font-family:var(--font-body);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-lt);text-decoration:none;opacity:0.7;transition:opacity 0.2s;" onmouseenter="this.style.opacity='1';this.style.color='var(--c-accent)';this.style.textShadow='0 0 10px var(--c-glow)'" onmouseleave="this.style.opacity='0.7';this.style.color='var(--c-neutral-lt)';this.style.textShadow='none'">Studio</a>
+            <a href="#" style="font-family:var(--font-body);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--c-neutral-lt);text-decoration:none;opacity:0.7;transition:opacity 0.2s;" onmouseenter="this.style.opacity='1';this.style.color='var(--c-accent)';this.style.textShadow='0 0 10px var(--c-glow)'" onmouseleave="this.style.opacity='0.7';this.style.color='var(--c-neutral-lt)';this.style.textShadow='none'">Contact</a>
+          </div>
+          <button class="btn-accent" style="padding:0.5rem 1.25rem;font-size:0.55rem;">
+            <span class="inner-label">CTA</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CARD STACK (parallax-clean pattern — dark section)
+         ============================================================ -->
+    <section class="stack-section" id="stack">
+      <!-- Grid lines decoration -->
+      <div class="grid-lines" style="opacity:0.4;">
+        <div class="grid-line"></div>
+        <div class="grid-line" style="position:relative;overflow:hidden;">
+          <span class="beam-1" style="position:absolute;top:0;left:50%;width:1px;height:80px;background:linear-gradient(to bottom,transparent,var(--c-accent),transparent);"></span>
+        </div>
+        <div class="grid-line"></div>
+        <div class="grid-line" style="position:relative;overflow:hidden;">
+          <span class="beam-3" style="position:absolute;top:0;left:50%;width:1px;height:100px;background:linear-gradient(to bottom,transparent,var(--c-accent),transparent);"></span>
+        </div>
+        <div class="grid-line" style="border-right:1px solid rgba(232,225,213,0.06);"></div>
+      </div>
+
+      <div style="text-align:center;padding:0 1.5rem;margin-bottom:5rem;position:relative;z-index:1;">
+        <div style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.25em;color:var(--c-neutral-dk);margin-bottom:1rem;"><span style="color:var(--c-accent);">03.5</span> / Projectos em Destaque</div>
+        <h2 class="display split-animate" style="font-size:clamp(2rem,5vw,5rem);color:var(--c-neutral-lt);">SELECTED WORKS</h2>
+      </div>
+
+      <div class="stack-container" style="position:relative;z-index:1;">
+        <!-- Card 1 -->
+        <div class="card-item">
+          <div class="card-inner" style="width:90%;height:100%;">
+            <div class="card-content">
+              <div>
+                <div class="card-num">01</div>
+                <h3 class="card-title">FLUNEX CORE</h3>
+                <p class="card-location">Plataforma · Brasil</p>
+              </div>
+              <p class="card-desc">Sistema central de automação com IA embarcada. Interface cuidadosamente projetada para equipes que valorizam a eficiência.</p>
+              <button class="btn-text" style="color:var(--c-neutral-lt);border-color:rgba(232,225,213,0.2);">Ver Projeto
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            </div>
+            <div class="card-img-wrap">
+              <div style="width:100%;height:100%;background:linear-gradient(135deg,rgba(42,31,47,0.8),rgba(143,244,189,0.15));display:flex;align-items:center;justify-content:center;">
+                <svg width="80" height="80" fill="none" stroke="rgba(143,244,189,0.5)" stroke-width="1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40"/><circle cx="50" cy="50" r="28"/><circle cx="50" cy="50" r="12"/><line x1="50" y1="10" x2="50" y2="90" stroke-dasharray="4 4"/><line x1="10" y1="50" x2="90" y2="50" stroke-dasharray="4 4"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="card-item">
+          <div class="card-inner" style="width:90%;height:100%;">
+            <div class="card-content">
+              <div>
+                <div class="card-num">02</div>
+                <h3 class="card-title">DASHBOARD PRO</h3>
+                <p class="card-location">Analytics · São Paulo</p>
+              </div>
+              <p class="card-desc">Painel de métricas em tempo real. Visualizações ricas e interativas para tomada de decisão estratégica.</p>
+              <button class="btn-text" style="color:var(--c-neutral-lt);border-color:rgba(232,225,213,0.2);">Ver Projeto
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            </div>
+            <div class="card-img-wrap">
+              <div style="width:100%;height:100%;background:linear-gradient(135deg,rgba(42,31,47,0.9),rgba(143,244,189,0.08));display:flex;align-items:center;justify-content:center;">
+                <svg width="90" height="60" fill="none" stroke="rgba(143,244,189,0.4)" stroke-width="1" viewBox="0 0 120 80"><rect x="5" y="5" width="110" height="70" rx="2"/><line x1="5" y1="20" x2="115" y2="20"/><rect x="15" y="30" width="20" height="35" fill="rgba(143,244,189,0.2)"/><rect x="45" y="40" width="20" height="25" fill="rgba(143,244,189,0.15)"/><rect x="75" y="25" width="20" height="40" fill="rgba(143,244,189,0.25)"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="card-item">
+          <div class="card-inner" style="width:90%;height:100%;">
+            <div class="card-content">
+              <div>
+                <div class="card-num">03</div>
+                <h3 class="card-title">STUDIO DS</h3>
+                <p class="card-location">Design System · Global</p>
+              </div>
+              <p class="card-desc">Sistema de design unificado para times distribuídos. Componentes vivos, documentação automática e tokens de design compartilhados.</p>
+              <button class="btn-text" style="color:var(--c-neutral-lt);border-color:rgba(232,225,213,0.2);">Ver Projeto
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            </div>
+            <div class="card-img-wrap">
+              <div style="width:100%;height:100%;background:linear-gradient(225deg,rgba(42,31,47,0.95),rgba(143,244,189,0.12));display:flex;align-items:center;justify-content:center;">
+                <svg width="80" height="80" fill="none" stroke="rgba(143,244,189,0.4)" stroke-width="1" viewBox="0 0 100 100"><rect x="10" y="10" width="30" height="30"/><rect x="55" y="10" width="30" height="30"/><rect x="10" y="55" width="30" height="30"/><rect x="55" y="55" width="30" height="30"/><line x1="25" y1="40" x2="25" y2="55" stroke-dasharray="3 3"/><line x1="75" y1="40" x2="75" y2="55" stroke-dasharray="3 3"/><line x1="40" y1="25" x2="55" y2="25" stroke-dasharray="3 3"/><line x1="40" y1="75" x2="55" y2="75" stroke-dasharray="3 3"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         4) ICONS
+         ============================================================ -->
+    <section id="icons" style="padding:8rem 0;border-bottom:1px solid var(--c-border);">
+      <div style="max-width:1400px;margin:0 auto;padding:0 clamp(1.5rem,6vw,7rem);">
+        <div class="section-label"><span>04</span> / Ícones</div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:1px;background:var(--c-border);margin-bottom:3rem;">
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span>arrow-right</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M7 17 17 7M17 7H7M17 7v10"/></svg><span>external</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>check-circle</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>zap</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><span>sun</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><circle cx="12" cy="12" r="10"/></svg><span>globe</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>user</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>message</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>shield</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>activity</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>monitor</span></div>
+          <div class="icon-cell"><svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>clock</span></div>
+        </div>
+
+        <!-- Icon sizes -->
+        <div style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--c-neutral-dk);margin-bottom:1.25rem;">Tamanhos</div>
+        <div style="display:flex;gap:2.5rem;align-items:flex-end;flex-wrap:wrap;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+            <svg width="12" height="12" fill="none" stroke="var(--c-primary)" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">12px</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+            <svg width="16" height="16" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">16px</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+            <svg width="20" height="20" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">20px</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+            <svg width="24" height="24" fill="none" stroke="var(--c-primary)" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">24px</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+            <svg width="32" height="32" fill="none" stroke="var(--c-accent)" stroke-width="1.5" viewBox="0 0 24 24" style="filter:drop-shadow(0 0 6px var(--c-glow));"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span style="font-family:var(--font-mono);font-size:0.55rem;color:var(--c-neutral-dk);">32px acento</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         5) MOTION
+         ============================================================ -->
+    <section id="motion" style="padding:8rem 0;border-bottom:1px solid var(--c-border);background:var(--c-surface);position:relative;overflow:hidden;">
+      <div class="liquid-blob" style="background:var(--c-accent);width:500px;height:500px;left:-150px;top:-100px;opacity:0.08;animation-duration:18s;"></div>
+
+      <div style="max-width:1400px;margin:0 auto;padding:0 clamp(1.5rem,6vw,7rem);position:relative;z-index:1;">
+        <div class="section-label"><span>05</span> / Animações & Motion</div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;">
+
+          <!-- Text Reveal -->
+          <div class="motion-demo">
+            <div class="motion-title">Text Reveal — Word Wrap</div>
+            <h2 class="display split-animate" style="font-size:2rem;color:var(--c-primary);line-height:1.1;">Structure as<br><span style="color:var(--c-accent);text-shadow:0 0 20px var(--c-glow);">sculpture.</span></h2>
+            <p style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);margin-top:1rem;">.word-inner { translateY(110%) → 0% }</p>
+          </div>
+
+          <!-- Fade Slide -->
+          <div class="motion-demo">
+            <div class="motion-title">Fade Slide In</div>
+            <div class="animate-on-scroll" style="animation:fadeSlideIn 1.2s var(--ease-out) 0.1s both;">
+              <div style="background:var(--c-primary);padding:1.5rem;color:var(--c-neutral-lt);">
+                <div style="font-family:var(--font-display);font-size:0.8rem;letter-spacing:0.15em;">ELEMENTO ANIMADO</div>
+                <div style="font-size:0.75rem;color:var(--c-neutral-dk);margin-top:0.5rem;">Fade + Slide + Blur on scroll</div>
+              </div>
+            </div>
+            <p style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);margin-top:1rem;">[animation:fadeSlideIn_1.2s_ease-out_both]</p>
+          </div>
+
+          <!-- Clip Reveal -->
+          <div class="motion-demo">
+            <div class="motion-title">Column Clip Reveal</div>
+            <div style="display:flex;gap:0.5rem;height:80px;">
+              <div class="col-anim delay-1" style="flex:1;background:var(--c-primary);opacity:0.3;"></div>
+              <div class="col-anim delay-2" style="flex:1;background:var(--c-primary);opacity:0.5;"></div>
+              <div class="col-anim delay-3" style="flex:1;background:var(--c-primary);opacity:0.7;"></div>
+              <div class="col-anim delay-4" style="flex:1;background:var(--c-primary);opacity:0.85;"></div>
+              <div class="col-anim delay-5" style="flex:1;background:var(--c-primary);"></div>
+            </div>
+            <p style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);margin-top:1rem;">clip-path: inset(0 0 100% 0 → 0%)</p>
+          </div>
+
+          <!-- Spin border -->
+          <div class="motion-demo" style="display:flex;align-items:center;gap:2rem;">
+            <div class="spin-border"></div>
+            <div>
+              <div class="motion-title">Rotating Border</div>
+              <p style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">border-top acento<br>1.4s linear infinite</p>
+            </div>
+          </div>
+
+          <!-- Pulse block -->
+          <div class="motion-demo" style="display:flex;align-items:center;gap:2rem;">
+            <div class="pulse-block"></div>
+            <div>
+              <div class="motion-title">Pulse Glow</div>
+              <p style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">scale + box-shadow<br>2s ease-in-out infinite</p>
+            </div>
+          </div>
+
+          <!-- Banner slide -->
+          <div class="motion-demo" style="overflow:hidden;">
+            <div class="motion-title">Slide Motion Banner</div>
+            <div style="position:relative;height:60px;overflow:hidden;background:var(--c-primary);display:flex;align-items:center;">
+              <div class="motion-banner-r" style="white-space:nowrap;font-family:var(--font-display);font-size:0.7rem;letter-spacing:0.3em;color:rgba(232,225,213,0.6);padding:0 2rem;">FLUNEX · DESIGN SISTEMA · MOTION · FLUNEX · DESIGN SISTEMA · MOTION ·</div>
+            </div>
+            <div style="position:relative;height:60px;overflow:hidden;background:rgba(42,31,47,0.05);display:flex;align-items:center;margin-top:2px;">
+              <div class="motion-banner-l" style="white-space:nowrap;font-family:var(--font-display);font-size:0.7rem;letter-spacing:0.3em;color:var(--c-neutral-dk);padding:0 2rem;">AUTOMAÇÃO · INTELIGÊNCIA · FLUXO · AUTOMAÇÃO · INTELIGÊNCIA · FLUXO ·</div>
+            </div>
+            <p style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);margin-top:1rem;">translateX alternado, ease-in-out, 5s/6s</p>
+          </div>
+
+          <!-- Beam animation -->
+          <div class="motion-demo" style="position:relative;overflow:hidden;min-height:120px;background:var(--c-primary);">
+            <div class="motion-title" style="color:var(--c-neutral-dk);z-index:2;position:relative;">Beam Fall</div>
+            <div class="beam-1" style="position:absolute;top:0;left:25%;width:1px;height:90px;background:linear-gradient(to bottom,transparent,var(--c-accent),transparent);"></div>
+            <div class="beam-2" style="position:absolute;top:0;left:50%;width:1px;height:70px;background:linear-gradient(to bottom,transparent,var(--c-accent),transparent);"></div>
+            <div class="beam-3" style="position:absolute;top:0;left:75%;width:1px;height:80px;background:linear-gradient(to bottom,transparent,var(--c-accent),transparent);"></div>
+            <p style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);margin-top:1rem;position:relative;z-index:2;">@keyframes beamFall — 7s/9s/8s linear ∞</p>
+          </div>
+
+          <!-- Floating orb -->
+          <div class="motion-demo" style="position:relative;min-height:120px;overflow:hidden;">
+            <div class="motion-title">Orb Float</div>
+            <div style="position:absolute;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,var(--c-accent) 0%,transparent 70%);filter:blur(20px);right:20%;top:50%;transform:translateY(-50%);animation:orbFloat 6s ease-in-out infinite alternate;"></div>
+            <p style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);margin-top:1rem;">translate + scale, 12s ease-in-out alternate</p>
+          </div>
+
+          <!-- Image hover scale (parallax-clean) -->
+          <div class="motion-demo" style="padding:0;overflow:hidden;">
+            <div style="width:100%;height:180px;overflow:hidden;position:relative;group:" class="group">
+              <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--c-primary),rgba(42,31,47,0.6));display:flex;align-items:center;justify-content:center;transition:transform 1.5s ease;" class="card-img" id="hover-img-demo">
+                <svg width="60" height="60" fill="none" stroke="rgba(143,244,189,0.5)" stroke-width="1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40"/><circle cx="50" cy="50" r="20"/></svg>
+              </div>
+            </div>
+            <div style="padding:1.25rem 1.5rem;">
+              <div class="motion-title">Image Hover Scale</div>
+              <p style="font-family:var(--font-mono);font-size:0.6rem;color:var(--c-neutral-dk);">transition: transform 1.5s ease; scale(1.1)</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         LAYOUT SECTION (brief)
+         ============================================================ -->
+    <section style="padding:8rem 0;border-bottom:1px solid var(--c-border);">
+      <div style="max-width:1400px;margin:0 auto;padding:0 clamp(1.5rem,6vw,7rem);">
+        <div class="section-label"><span>06</span> / Layout & Grid</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--c-border);margin-bottom:2rem;">
+          <div style="background:var(--c-surface);padding:2rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--c-neutral-dk);">col 1</div>
+          <div style="background:var(--c-bg);padding:2rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--c-neutral-dk);">col 2</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--c-border);margin-bottom:2rem;">
+          <div style="background:var(--c-surface);padding:2rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--c-neutral-dk);">col 1</div>
+          <div style="background:var(--c-bg);padding:2rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--c-neutral-dk);">col 2</div>
+          <div style="background:var(--c-surface);padding:2rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--c-neutral-dk);">col 3</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1px;background:var(--c-border);">
+          <div style="background:var(--c-surface);padding:2rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--c-neutral-dk);">2/3 content</div>
+          <div style="background:var(--c-bg);padding:2rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--c-neutral-dk);">1/3 sidebar</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FOOTER CTA
+         ============================================================ -->
+    <footer class="flx-footer">
+      <div class="footer-glow"></div>
+      <div style="position:relative;z-index:1;">
+        <p class="footer-sub">Tem um projeto?</p>
+        <a href="mailto:hello@flunex.com" class="btn-big-link" style="color:var(--c-neutral-lt);">
+          LET'S TALK
+        </a>
+        <div class="flx-divider" style="margin:3rem auto;max-width:200px;"></div>
+        <div style="display:flex;justify-content:center;gap:2.5rem;margin-bottom:3rem;">
+          <a href="#" style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);text-decoration:none;transition:color 0.3s;" onmouseenter="this.style.color='var(--c-accent)'" onmouseleave="this.style.color='var(--c-neutral-dk)'">Instagram</a>
+          <a href="#" style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);text-decoration:none;transition:color 0.3s;" onmouseenter="this.style.color='var(--c-accent)'" onmouseleave="this.style.color='var(--c-neutral-dk)'">LinkedIn</a>
+          <a href="#" style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-neutral-dk);text-decoration:none;transition:color 0.3s;" onmouseenter="this.style.color='var(--c-accent)'" onmouseleave="this.style.color='var(--c-neutral-dk)'">Behance</a>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:0.55rem;color:rgba(140,140,140,0.5);letter-spacing:0.2em;">© 2025 FLUNEX DESIGN SYSTEM 3.0</div>
+      </div>
+    </footer>
+  </div>
+  <!-- end wrapper -->
+
+  <!-- ============================================================
+       MODAL
+       ============================================================ -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal-box">
+      <button class="modal-close" id="modal-close">×</button>
+      <div style="font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--c-accent);text-shadow:0 0 10px var(--c-glow);margin-bottom:1.25rem;">[ Modal Component ]</div>
+      <h3 style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;color:var(--c-primary);margin:0 0 1rem;">Título do Modal</h3>
+      <p style="font-size:0.875rem;color:var(--c-text-muted);line-height:1.7;margin-bottom:2rem;">Este é um exemplo de modal animado. O fundo usa blur glassmorphism e o conteúdo surge com scale + translateY suave. Pressione ESC ou × para fechar.</p>
+      <div style="display:flex;gap:1rem;">
+        <button class="btn-primary" id="modal-close-btn">Confirmar</button>
+        <button class="btn-ghost" id="modal-cancel"><span>Cancelar</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    // ── GSAP SETUP ──────────────────────────────────────────────
+    gsap.registerPlugin(ScrollTrigger);
+
+    // ── LENIS SMOOTH SCROLL ─────────────────────────────────────
+    const lenis = new Lenis({
+      duration: 1.3,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      smooth: true,
+    });
+    function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+    requestAnimationFrame(raf);
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
+
+    // ── TEXT SPLITTER (parallax-clean pattern) ──────────────────
+    function splitTextToWords(element) {
+      const text = element.innerText;
+      const words = text.split(' ');
+      element.innerHTML = '';
+      words.forEach(word => {
+        const wrap = document.createElement('span');
+        wrap.className = 'word-wrap';
+        wrap.innerHTML = `<span class="word-inner">${word}&nbsp;</span>`;
+        element.appendChild(wrap);
+      });
+    }
+    document.querySelectorAll('.split-animate').forEach(el => splitTextToWords(el));
+
+    // ── PRELOADER ────────────────────────────────────────────────
+    const loadTl = gsap.timeline({
+      onComplete: () => {
+        document.body.style.opacity = 1;
+        initSite();
+      }
+    });
+    loadTl
+      .to('#loader-bar', { width: '100%', duration: 1.6, ease: 'power2.inOut' })
+      .to('#loader .loader-text', { y: -40, opacity: 0, duration: 0.5 })
+      .to('#loader .loader-accent', { y: -20, opacity: 0, duration: 0.4 }, '<0.1')
+      .to('#loader', { yPercent: -100, duration: 1, ease: 'power4.inOut' });
+
+    // ── SITE INIT ────────────────────────────────────────────────
+    function initSite() {
+      // Hero animations
+      gsap.to('.hero-heading .line .inner', {
+        y: 0, stagger: 0.12, duration: 1.6, ease: 'power4.out', delay: 0.1
+      });
+      gsap.to('#hero-eyebrow', { opacity: 1, y: 0, duration: 1, delay: 0.3 });
+      gsap.to('#hero-sub',    { opacity: 1, y: 0, duration: 1, delay: 0.55 });
+      gsap.to('#hero-ctas',   { opacity: 1, y: 0, duration: 1, delay: 0.75 });
+      gsap.to('#hero-stats',  { opacity: 1, y: 0, duration: 1, delay: 1.0 });
+      gsap.to('#hero-scroll', { opacity: 1, y: 0, duration: 1, delay: 1.2 });
+
+      // Parallax orb on hero scroll
+      gsap.to('.hero-orb', {
+        yPercent: 35,
+        ease: 'none',
+        scrollTrigger: { trigger: '.hero-section', start: 'top top', end: 'bottom top', scrub: 1.5 }
+      });
+
+      // Split-animate on scroll (section headings)
+      document.querySelectorAll('.split-animate').forEach(el => {
+        const words = el.querySelectorAll('.word-inner');
+        gsap.to(words, {
+          y: '0%', duration: 1.1, ease: 'power3.out', stagger: 0.025,
+          scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none reverse' }
+        });
+      });
+
+      // Reveal elements
+      document.querySelectorAll('.reveal').forEach(el => {
+        gsap.fromTo(el,
+          { opacity: 0, y: 28 },
+          { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' }
+          }
+        );
+      });
+
+      // animate-on-scroll (IntersectionObserver pattern from creative-agency/lumina)
+      if (!window.__inViewIO) {
+        window.__inViewIO = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('animate');
+              window.__inViewIO.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+      }
+      document.querySelectorAll('.animate-on-scroll').forEach(el => window.__inViewIO.observe(el));
+
+      // Card stack (parallax-clean pattern)
+      const cards = gsap.utils.toArray('.card-item');
+      cards.forEach((card, i) => {
+        const next = cards[i + 1];
+        if (next) {
+          gsap.to(card.querySelector('.card-inner'), {
+            scale: 0.91, opacity: 0.45, ease: 'none',
+            scrollTrigger: {
+              trigger: next,
+              start: 'top bottom', end: 'top 10vh',
+              scrub: true
+            }
+          });
+        }
+      });
+
+      // Image hover scale demo
+      const imgDemo = document.getElementById('hover-img-demo');
+      if (imgDemo) {
+        imgDemo.parentElement.addEventListener('mouseenter', () => gsap.to(imgDemo, { scale: 1.08, duration: 1.5, ease: 'power2.out' }));
+        imgDemo.parentElement.addEventListener('mouseleave', () => gsap.to(imgDemo, { scale: 1, duration: 1.5, ease: 'power2.out' }));
+      }
+    }
+
+    // ── MODAL ────────────────────────────────────────────────────
+    const modal = document.getElementById('modal');
+    document.getElementById('modal-trigger').addEventListener('click', () => modal.classList.add('open'));
+    ['modal-close','modal-close-btn','modal-cancel'].forEach(id => {
+      document.getElementById(id).addEventListener('click', () => modal.classList.remove('open'));
+    });
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('open'); });
+  </script>
+</body>
+</html>
