@@ -827,6 +827,203 @@
       to { transform: translateX(calc(-50% - 0.75rem)); }
     }
 
+    /* Modules Deepdive (Continuation) */
+    .modules-deepdive {
+      margin-top: 10rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+    .deepdive-left {
+      max-width: 500px;
+    }
+    .deepdive-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 4.5vw, 4rem);
+      line-height: 1.05;
+      margin-bottom: 2rem;
+    }
+    .deepdive-desc {
+      font-family: var(--font-body);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: rgba(232, 225, 213, 0.7);
+      margin-bottom: 3rem;
+    }
+    .deepdive-steps {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid rgba(232, 225, 213, 0.1);
+    }
+    .step-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 1rem 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(232, 225, 213, 0.1);
+      cursor: pointer;
+      color: rgba(232, 225, 213, 0.4);
+      transition: all 0.3s ease;
+    }
+    .step-item:hover, .step-item.active {
+      background: rgba(232, 225, 213, 0.02);
+      color: var(--c-neutral-lt);
+    }
+    .step-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0px;
+      border-left: 2px solid transparent;
+      transition: border-color 0.3s;
+    }
+    .step-item:hover::before {
+      border-color: rgba(232, 225, 213, 0.2);
+    }
+    .step-item.active::before {
+      border-color: var(--c-accent);
+    }
+    .step-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .step-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+    }
+    .step-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.02em;
+    }
+    .step-arrow {
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.3s ease;
+    }
+    .step-item:hover .step-arrow, .step-item.active .step-arrow {
+      opacity: 1;
+      transform: translateX(0);
+      color: var(--c-accent);
+    }
+
+    /* Stacked Cards Layout */
+    .card-stack-wrapper {
+      position: relative;
+      width: 100%;
+      height: 540px;
+      perspective: 1000px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .card-stack-item {
+      position: absolute;
+      width: 100%;
+      max-width: 420px;
+      height: 100%;
+      border-radius: 1.5rem;
+      background: rgba(232, 225, 213, 0.03); /* subtle dark glass */
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(232, 225, 213, 0.1);
+      padding: 3rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      right: 0;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: -10px 10px 40px rgba(0,0,0,0.4);
+    }
+    /* Default Stack (Resting state) */
+    .card-stack-item:nth-child(1) { /* Front */
+      transform: translateX(0) scale(1);
+      z-index: 3;
+      background: rgba(232, 225, 213, 0.06);
+    }
+    .card-stack-item:nth-child(2) { /* Middle */
+      transform: translateX(-50px) scale(0.92);
+      z-index: 2;
+      opacity: 0.8;
+      border-color: rgba(232, 225, 213, 0.05);
+    }
+    .card-stack-item:nth-child(3) { /* Back */
+      transform: translateX(-100px) scale(0.84);
+      z-index: 1;
+      opacity: 0.4;
+      border-color: rgba(232, 225, 213, 0.02);
+    }
+    /* Fan Out on Hover */
+    .card-stack-wrapper:hover .card-stack-item:nth-child(1) {
+      transform: translateX(20px) scale(1) translateZ(0); /* small separation */
+    }
+    .card-stack-wrapper:hover .card-stack-item:nth-child(2) {
+      transform: translateX(-70px) scale(0.92) translateZ(0);
+      opacity: 0.95;
+    }
+    .card-stack-wrapper:hover .card-stack-item:nth-child(3) {
+      transform: translateX(-160px) scale(0.84) translateZ(0);
+      opacity: 0.7;
+    }
+
+    .card-module-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--c-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 2rem;
+      display: inline-block;
+      padding: 0.5rem 1.2rem;
+      border: 1px solid var(--c-accent);
+      border-radius: 99px;
+    }
+    .card-stack-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      color: var(--c-neutral-lt);
+    }
+    .card-stack-desc {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: rgba(232, 225, 213, 0.7);
+      line-height: 1.6;
+      flex-grow: 1;
+    }
+    .card-stack-link {
+      margin-top: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--c-neutral-lt);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.3s;
+    }
+    .card-stack-link:hover {
+      color: var(--c-accent);
+    }
+
+    /* ============================================================
+       SECTION 6: DELIVERY / COMO ENTREGAMOS
+       ============================================================ */
+    #delivery-section {
+      background: var(--c-bg); /* light background */
+      color: var(--c-primary);
+      padding: 12rem max(2rem, 5vw) 6rem;
+      position: relative;
+      z-index: 20;
+    }
+
     /* Tablets / Mobile */
     @media (max-width: 1024px) {
       #hero-content {
@@ -867,6 +1064,14 @@
       /* Section 5 overrrides */
       .modules-desc-row { flex-direction: column; gap: 2rem; }
       
+      /* Deepdive Overrides */
+      .modules-deepdive { grid-template-columns: 1fr; gap: 4rem; margin-top: 6rem; }
+      .deepdive-left { max-width: 100%; }
+      .card-stack-wrapper { justify-content: center; height: auto; display: flex; flex-direction: column; gap: 2rem; perspective: none; }
+      .card-stack-item { position: relative; max-width: 100%; right: auto; transform: none !important; opacity: 1 !important; z-index: 1 !important; }
+      .card-stack-item:nth-child(1), .card-stack-item:nth-child(2), .card-stack-item:nth-child(3) { transform: none !important; opacity: 1 !important; }
+      .card-stack-wrapper:hover .card-stack-item { transform: none !important; opacity: 1 !important; }
+
     }
     @media (max-width: 600px) {
       #hero-h1 { font-size: clamp(3rem, 12vw, 4rem); }
@@ -1141,6 +1346,96 @@
         <div class="carousel-pill">Mapeamento de processos</div>
       </div>
     </div>
+
+    <!-- Deepdive Layout -->
+    <div class="modules-container modules-deepdive">
+      <!-- Left Content -->
+      <div class="deepdive-left">
+         <h2 class="deepdive-title">Resultados desde a <br><span class="highlight">primeira entrega</span>.</h2>
+         <p class="deepdive-desc">
+            Cada serviço individual da Flunex resolve um problema real da sua operação. Não é preciso esperar todas as etapas para ver diferença no dia a dia.
+         </p>
+         
+         <div class="deepdive-steps">
+            <div class="step-item active">
+               <div class="step-info">
+                  <span class="step-num">01</span>
+                  <span class="step-title">Diagnóstico inteligente</span>
+               </div>
+               <svg class="step-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </div>
+            <div class="step-item">
+               <div class="step-info">
+                  <span class="step-num">02</span>
+                  <span class="step-title">Estruturação da base (CORE)</span>
+               </div>
+               <svg class="step-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </div>
+            <div class="step-item">
+               <div class="step-info">
+                  <span class="step-num">03</span>
+                  <span class="step-title">Automação contínua (FLOW)</span>
+               </div>
+               <svg class="step-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </div>
+            <div class="step-item">
+               <div class="step-info">
+                  <span class="step-num">04</span>
+                  <span class="step-title">Inteligência aplicada (INSIGHT)</span>
+               </div>
+               <svg class="step-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </div>
+         </div>
+      </div>
+      
+      <!-- Right Content: Interactive Stacked Cards -->
+      <div class="deepdive-right">
+         <div class="card-stack-wrapper">
+            <!-- Card 1 (Front) -->
+            <div class="card-stack-item">
+               <div><span class="card-module-tag">FLUNEX CORE</span></div>
+               <h3 class="card-stack-title">A base que organiza tudo, mesmo começando pequena.</h3>
+               <p class="card-stack-desc">Estruturamos presença digital, fluxos comerciais, rastreabilidade de dados, páginas, sites e primeiras automações para eliminar o improviso do dia a dia. De uma landing page ou CRM isolado à estrutura completa, você escolhe.</p>
+               <a href="#" class="card-stack-link">Ver detalhes do CORE <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+            </div>
+            <!-- Card 2 (Middle) -->
+            <div class="card-stack-item">
+               <div><span class="card-module-tag">FLUNEX FLOW</span></div>
+               <h3 class="card-stack-title">Automação prática que reduz trabalho manual.</h3>
+               <p class="card-stack-desc">Bots operacionais, integrações entre plataformas, fluxos inteligentes e redução de tarefas manuais. Sua operação finalmente flui sozinha.</p>
+               <a href="#" class="card-stack-link">Ver detalhes do FLOW <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+            </div>
+            <!-- Card 3 (Back) -->
+            <div class="card-stack-item">
+               <div><span class="card-module-tag">FLUNEX INSIGHT</span></div>
+               <h3 class="card-stack-title">Clareza para decisões.</h3>
+               <p class="card-stack-desc">Dashboards inteligentes, leitura profunda da operação, identificação de gargalos e indicadores que mostram exatamente onde agir. Perfeito para quem já opera de forma estruturada, mas precisa enxergar com nitidez.</p>
+               <a href="#" class="card-stack-link">Ver detalhes do INSIGHT <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+            </div>
+         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 6: DELIVERY / COMO ENTREGAMOS
+       ============================================================ -->
+  <section id="delivery-section">
+    <div class="intro-block delivery-block"> <!-- Reusing Section 2 grid classes -->
+      <div class="intro-left">
+        <div class="intro-eyebrow">04</div>
+        <h2 class="intro-title" style="max-width: 15ch;">Como a Flunex entrega tudo isso?</h2>
+        <div class="intro-meta">MÃO NA MASSA</div>
+        
+        <a href="#contact" class="intro-link">Iniciar projeto</a>
+      </div>
+      <div class="intro-right">
+        <p class="intro-desc">
+          Nós implementamos para você. Sem você precisar aprender ferramentas, ver tutoriais ou reorganizar toda a equipe.<br><br>
+          A Flunex configura, integra, automatiza e estrutura. Você só utiliza.<strong style="display:block; margin-top:2rem; font-weight:600;">Simples assim.</strong>
+        </p>
+      </div>
+    </div>
   </section>
 
   <!-- ============================================================
@@ -1264,6 +1559,29 @@
           toggleActions: 'play none none reverse'
         }
       });
+
+      // 7. Interactive Stacked Cards rotation
+      const stackWrapper = document.querySelector('.card-stack-wrapper');
+      if (stackWrapper) {
+        // Rotate cards when clicking anywhere on the stack
+        stackWrapper.addEventListener('click', () => {
+          const cards = Array.from(stackWrapper.querySelectorAll('.card-stack-item'));
+          if(cards.length > 0) stackWrapper.appendChild(cards[0]);
+        });
+
+        // Interactive Steps List visually
+        const steps = document.querySelectorAll('.step-item');
+        steps.forEach((step) => {
+          step.addEventListener('click', () => {
+             steps.forEach(s => s.classList.remove('active'));
+             step.classList.add('active');
+             
+             // Shuffle cards instantly when clicking an index item
+             const cards = Array.from(stackWrapper.querySelectorAll('.card-stack-item'));
+             if(cards.length > 0) stackWrapper.appendChild(cards[0]);
+          });
+        });
+      }
 
     });
   </script>
