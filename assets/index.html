@@ -1024,6 +1024,184 @@
       z-index: 20;
     }
 
+    /* ============================================================
+       SECTION 7: TARGET / PARA QUEM É
+       ============================================================ */
+    #target-section {
+      background: var(--c-bg); /* Areia Quente */
+      color: var(--c-primary);
+      padding: 0 max(2rem, 5vw) 10rem;
+      position: relative;
+      z-index: 20;
+    }
+    .target-container {
+      max-width: 1050px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    /* Center Pipeline */
+    .target-pipeline {
+      position: absolute;
+      left: 50%;
+      top: 5rem;
+      bottom: 5rem;
+      width: 4px;
+      background: rgba(42, 31, 47, 0.05); /* very light track */
+      border-radius: 99px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1;
+    }
+    .pipeline-glow-container {
+      position: absolute; 
+      overflow: hidden; 
+      width: 100%; 
+      height: 100%; 
+      border-radius: 99px;
+    }
+    .pipeline-glow {
+      position: absolute;
+      top: -100px;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(to bottom, transparent, var(--c-accent), transparent);
+      animation: slide-glow 3s linear infinite;
+    }
+    @keyframes slide-glow {
+      0% { top: -120px; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+    
+    /* Pipeline Nodes */
+    .pipeline-node {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--c-bg);
+      border: 1px solid rgba(42, 31, 47, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      box-shadow: 0 4px 15px rgba(42, 31, 47, 0.05);
+      transition: transform 0.3s;
+    }
+    .target-row:hover .pipeline-node {
+      transform: scale(1.15);
+    }
+    .pipeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    
+    /* Rows */
+    .target-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 6rem;
+      margin-bottom: 8rem;
+      position: relative;
+      z-index: 2;
+    }
+    .target-row:last-child {
+      margin-bottom: 0;
+    }
+    .target-col {
+      width: calc(50% - 3rem);
+    }
+    .target-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.3rem, 3.5vw, 3rem);
+      line-height: 1.1;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      color: var(--c-primary);
+    }
+    .target-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: rgba(42, 31, 47, 0.4);
+      margin-bottom: 1.5rem;
+      display: flex;
+    }
+    .target-glass-card {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 10px 30px rgba(42, 31, 47, 0.03);
+      border-radius: 1.5rem;
+      padding: 3rem 2.5rem;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s;
+    }
+    .target-row:hover .target-glass-card {
+      transform: translateY(-5px);
+      border-color: rgba(255,255,255,1);
+    }
+    .target-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .target-list li {
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      color: rgba(42, 31, 47, 0.8);
+      line-height: 1.5;
+      padding-left: 2rem;
+      position: relative;
+    }
+    .target-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.6rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    
+    .card-icon-wrap {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    /* Colors */
+    .target-prim li::before { background: var(--c-primary); }
+    .target-red li::before { background: #E85D5D; }
+    .target-acc li::before { background: #00A67E; } /* Darker green to ensure contrast on light bg */
+    
+    /* Alignments */
+    .target-row.left-aligned .target-col:first-child {
+      text-align: right;
+    }
+    .target-row.left-aligned .target-eyebrow {
+      justify-content: flex-end;
+    }
+    .target-row.right-aligned {
+      flex-direction: row-reverse;
+    }
+    .target-row.right-aligned .target-col:last-child {
+      text-align: left;
+    }
+
     /* Tablets / Mobile */
     @media (max-width: 1024px) {
       #hero-content {
@@ -1071,6 +1249,15 @@
       .card-stack-item { position: relative; max-width: 100%; right: auto; transform: none !important; opacity: 1 !important; z-index: 1 !important; }
       .card-stack-item:nth-child(1), .card-stack-item:nth-child(2), .card-stack-item:nth-child(3) { transform: none !important; opacity: 1 !important; }
       .card-stack-wrapper:hover .card-stack-item { transform: none !important; opacity: 1 !important; }
+
+      /* Target Overrides */
+      .target-pipeline { display: none; }
+      .target-row, .target-row.right-aligned { flex-direction: column; gap: 2.5rem; margin-bottom: 5rem; }
+      .target-col { width: 100% !important; }
+      .target-row.left-aligned .target-col:first-child,
+      .target-row.right-aligned .target-col:last-child { text-align: left; }
+      .target-row.left-aligned .target-eyebrow { justify-content: flex-start; }
+      .target-glass-card { padding: 2rem 1.5rem; }
 
     }
     @media (max-width: 600px) {
@@ -1435,6 +1622,90 @@
           A Flunex configura, integra, automatiza e estrutura. Você só utiliza.<strong style="display:block; margin-top:2rem; font-weight:600;">Simples assim.</strong>
         </p>
       </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 7: TARGET / PARA QUEM É
+       ============================================================ -->
+  <section id="target-section">
+    <div class="target-container">
+      
+      <!-- Center Pipeline -->
+      <div class="target-pipeline hidden md:flex">
+         <div class="pipeline-glow-container">
+           <div class="pipeline-glow"></div>
+         </div>
+         <div class="pipeline-node"><div class="pipeline-dot" style="background:var(--c-primary); box-shadow: 0 0 10px var(--c-primary);"></div></div>
+         <div class="pipeline-node"><div class="pipeline-dot" style="background:#E85D5D; box-shadow: 0 0 10px #E85D5D;"></div></div>
+         <div class="pipeline-node"><div class="pipeline-dot" style="background:#00A67E; box-shadow: 0 0 10px #00A67E;"></div></div>
+      </div>
+
+      <!-- Row 1 -->
+      <div class="target-row left-aligned">
+        <div class="target-col">
+           <div class="target-eyebrow">Para Quem</div>
+           <h3 class="target-title">Para quem é a<br>Flunex</h3>
+        </div>
+
+        <div class="target-col">
+           <div class="target-glass-card">
+              <div class="card-icon-wrap" style="color: var(--c-primary); border: 1px solid rgba(42,31,47,0.1); background: rgba(42,31,47,0.05); box-shadow: 0 0 15px rgba(42,31,47,0.05);">
+                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              </div>
+              <ul class="target-list target-prim">
+                 <li>Empresas que querem reduzir retrabalho e eliminar improvisos</li>
+                 <li>Times que precisam de clareza para tomar decisões</li>
+                 <li>Operações que precisam conectar sistemas e automatizar rotinas</li>
+                 <li>Negócios que querem crescer sem peso operacional</li>
+              </ul>
+           </div>
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="target-row right-aligned">
+        <div class="target-col">
+           <div class="target-eyebrow">Descomplique</div>
+           <h3 class="target-title">Com a Flunex,<br>você <span style="color:#E85D5D;">não precisa</span>:</h3>
+        </div>
+
+        <div class="target-col">
+           <div class="target-glass-card">
+              <div class="card-icon-wrap" style="color: #E85D5D; border: 1px solid rgba(232,93,93,0.2); background: rgba(232,93,93,0.05); box-shadow: 0 0 15px rgba(232,93,93,0.1);">
+                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              </div>
+              <ul class="target-list target-red">
+                 <li>Entender de tecnologia</li>
+                 <li>Mudar toda a operação de uma vez</li>
+                 <li>Fazer todos os módulos</li>
+                 <li>Aprender novas ferramentas sozinho</li>
+              </ul>
+           </div>
+        </div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="target-row left-aligned">
+        <div class="target-col">
+           <div class="target-eyebrow">Foque no essencial</div>
+           <h3 class="target-title">Você <span style="color:#00A67E;">só precisa</span>:</h3>
+        </div>
+
+        <div class="target-col">
+           <div class="target-glass-card">
+              <div class="card-icon-wrap" style="color: #00A67E; border: 1px solid rgba(0,166,126,0.3); background: rgba(0,166,126,0.06); box-shadow: 0 0 15px rgba(0,166,126,0.1);">
+                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </div>
+              <ul class="target-list target-acc">
+                 <li>Querer mais clareza</li>
+                 <li>Querer menos improviso</li>
+                 <li>Querer mais tempo livre</li>
+              </ul>
+           </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
