@@ -68,7 +68,8 @@
     .noise-overlay {
       position: fixed; inset: 0;
       pointer-events: none; z-index: 9000;
-      opacity: 0.045;
+      opacity: 0.2;
+      mix-blend-mode: overlay;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
@@ -82,16 +83,27 @@
       display: flex; flex-direction: column;
       justify-content: center; align-items: center;
       gap: 1.5rem;
+      overflow: hidden;
     }
-    #loader-wordmark {
-      font-family: var(--font-display);
-      font-size: clamp(3rem, 10vw, 8rem);
-      letter-spacing: 0.05em;
-      color: var(--c-neutral-lt);
+    .loader-video-bg {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: 0.35; z-index: 1; pointer-events: none;
+    }
+    .loader-overlay-texture {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(42, 31, 47, 0.4); backdrop-filter: blur(4px); z-index: 2; pointer-events: none;
+    }
+    .loader-content {
+      position: relative; z-index: 10;
+    }
+    #loader-logo-img {
+      max-width: clamp(150px, 20vw, 350px);
+      height: auto; object-fit: contain;
     }
     #loader-bar-wrap {
       position: absolute; bottom: 0; left: 0; right: 0;
       height: 3px;
+      z-index: 10;
     }
     #loader-bar-fill {
       height: 100%;
@@ -142,6 +154,10 @@
       align-items: center;
       overflow: hidden;
       background: radial-gradient(ellipse 100% 70% at 30% 60%, rgba(143,244,189,0.06) 0%, transparent 60%);
+    }
+    .hero-video-bg {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: 0.12; z-index: 0; pointer-events: none; mix-blend-mode: luminosity;
     }
 
     #hero-content {
@@ -224,25 +240,69 @@
       flex-wrap: wrap;
     }
 
-    .btn-solid {
-      display: inline-flex; align-items: center; gap: 0.8rem;
-      background: linear-gradient(135deg, #1A121D 0%, #2A1F2F 100%);
-      border: 1px solid rgba(143,244,189,0.3);
-      padding: 1rem 2.2rem;
-      border-radius: 50px;
+    /* Animated Shiny CTA Button Styles */
+    @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+    @property --gradient-angle-offset { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+    @property --gradient-percent { syntax: "<percentage>"; initial-value: 20%; inherits: false; }
+    @property --gradient-shine { syntax: "<color>"; initial-value: #8FF4BD; inherits: false; }
+    
+    .btn-shiny {
+      --gradient-angle: 0deg;
+      --gradient-angle-offset: 0deg;
+      --gradient-percent: 20%;
+      --gradient-shine: var(--c-accent);
+      position: relative;
+      overflow: hidden;
+      border-radius: 99px;
+      padding: 1.15rem 2.5rem;
       font-family: var(--font-body);
-      font-size: 0.9rem; font-weight: 600;
-      color: var(--c-neutral-lt);
+      font-size: 0.95rem; font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #ffffff;
+      background: linear-gradient(#080808, #080808) padding-box,
+                  conic-gradient(from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
+                  transparent 0%, var(--c-accent) 5%, var(--gradient-shine) 15%, var(--c-accent) 30%, transparent 40%, transparent 100%) border-box;
+      border: 2px solid transparent;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+      outline: none;
+      transition: --gradient-angle-offset 800ms cubic-bezier(0.25, 1, 0.5, 1), --gradient-percent 800ms cubic-bezier(0.25, 1, 0.5, 1), --gradient-shine 800ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s;
+      cursor: pointer;
+      isolation: isolate;
+      z-index: 0;
+      animation: border-spin 2.5s linear infinite;
       text-decoration: none;
-      transition: all 0.3s var(--ease-out);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      display: inline-flex; align-items: center; justify-content: center;
     }
-    .btn-solid:hover {
-      border-color: var(--c-accent);
-      background: var(--c-accent);
-      color: var(--c-primary);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(143,244,189,0.25);
+    @keyframes border-spin { to { --gradient-angle: 360deg; } }
+    .btn-shiny:active { transform: translateY(1px); }
+    .btn-shiny::before {
+      content: ''; pointer-events: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      z-index: 0; --size: calc(100% - 6px); --position: 2px; --space: 4px;
+      width: var(--size); height: var(--size);
+      background: radial-gradient(circle at var(--position) var(--position), rgba(255,255,255,0.1) 0.5px, transparent 0) padding-box;
+      background-size: var(--space) var(--space); background-repeat: space;
+      mask-image: conic-gradient(from calc(var(--gradient-angle) + 45deg), black, transparent 10% 90%, black);
+      border-radius: inherit; opacity: 0.4;
+    }
+    .btn-shiny::after {
+      content: ''; pointer-events: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      z-index: 1; width: 100%; aspect-ratio: 1;
+      background: linear-gradient(-50deg, transparent, var(--c-accent), transparent);
+      mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+      opacity: 0.6; animation: form-shimmer 4s linear infinite;
+    }
+    .btn-shiny span { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-shiny span::before {
+      content: ''; pointer-events: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      z-index: -1; --size: calc(100% + 1rem); width: var(--size); height: var(--size);
+      box-shadow: inset 0 -1ex 2rem 4px rgba(143,244,189,0.3); opacity: 0; border-radius: inherit;
+      transition: opacity 800ms cubic-bezier(0.25, 1, 0.5, 1); animation: form-breathe 4.5s linear infinite;
+    }
+    @keyframes form-shimmer { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    @keyframes form-breathe {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.20); }
     }
     
     .btn-ghost-minimal {
@@ -449,8 +509,14 @@
       padding-bottom: 0.4rem;
       align-self: flex-start;
       transition: all 0.3s;
+      position: relative;
     }
-    .intro-link:hover { color: var(--c-accent); border-color: var(--c-accent); }
+    .intro-link::after {
+      content: ''; position: absolute; left: 0; bottom: -1px; width: 100%; height: 1px;
+      background: var(--c-accent); transform: scaleX(0); transform-origin: right; transition: transform 0.4s var(--ease-out);
+    }
+    .intro-link:hover { color: var(--c-accent); border-bottom-color: transparent; }
+    .intro-link:hover::after { transform: scaleX(1); transform-origin: left; }
 
     /* RIGHT SIDE */
     .intro-right {
@@ -1207,7 +1273,7 @@
        ============================================================ */
     #founder-section {
       background: var(--c-bg); /* Areia Quente */
-      padding: 8rem max(2rem, 5vw) 12rem;
+      padding: 4rem max(2rem, 5vw) 12rem; /* Reduced top spacing requested by user */
       position: relative;
       z-index: 20;
     }
@@ -1422,20 +1488,25 @@
        ============================================================ */
     #site-footer {
       background: var(--c-primary);
-      color: rgba(255,255,255,0.5);
-      padding: 3rem max(2rem, 5vw);
-      font-family: var(--font-body);
-      font-size: 0.9rem;
+      color: rgba(255,255,255,0.35); /* More discreet */
+      padding: 1.5rem max(2rem, 5vw); /* Reduced padding */
+      font-family: var(--font-mono); /* Technical elegant font */
+      font-size: 0.75rem; /* Smaller text */
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid rgba(255,255,255,0.05);
+      border-top: 1px solid rgba(255,255,255,0.03); /* Subtle hairline */
     }
-    .footer-logo {
-      color: #fff;
-      font-family: var(--font-display);
-      font-size: 2rem;
-      letter-spacing: 0.05em;
+    .footer-logo img {
+      height: 20px !important;
+      opacity: 0.5;
+      transform: translateY(2px);
+      transition: opacity 0.3s ease;
+    }
+    .footer-logo:hover img {
+      opacity: 1;
     }
 
     /* Tablets / Mobile */
@@ -1521,17 +1592,28 @@
 
   <!-- Preloader -->
   <div id="loader" aria-label="Carregando">
-    <div id="loader-wordmark">FLUNEX</div>
+    <!-- Background Video -->
+    <video autoplay loop muted playsinline class="loader-video-bg">
+        <source src="raw_files/woman_office_walking.mp4" type="video/mp4">
+    </video>
+    <div class="loader-overlay-texture"></div>
+
+    <div class="loader-content">
+       <img src="raw_files/flunex_white.png" alt="Flunex Logo" id="loader-logo-img">
+    </div>
+    
     <div id="loader-bar-wrap"><div id="loader-bar-fill"></div></div>
   </div>
 
   <!-- Main Navigation -->
   <nav id="main-nav">
-    <a class="nav-logo" href="#">FLUNEX</a>
+    <a class="nav-logo" href="#">
+      <img src="raw_files/flunex_white.png" alt="Flunex Logo" style="height: 28px; width: auto;">
+    </a>
     <div class="nav-links hidden md:flex">
-      <a href="#">Workflow</a>
-      <a href="#">Soluções</a>
-      <a href="#">Casos reais</a>
+      <a href="#intro-section">A FLUNEX</a>
+      <a href="#modules-section">SOLUÇÕES</a>
+      <a href="#cta-section">DIAGNÓSTICO</a>
     </div>
   </nav>
 
@@ -1539,9 +1621,13 @@
        HERO SECTION — "Craft Visual Stories." reference style
        ============================================================ -->
   <section id="hero">
+    <!-- Background Video -->
+    <video autoplay loop muted playsinline class="hero-video-bg">
+        <source src="raw_files/woman_office_walking.mp4" type="video/mp4">
+    </video>
     
     <!-- Deep organic subtle lines -->
-    <div class="bg-lines">
+    <div class="bg-lines" style="z-index: 1; position: absolute; inset: 0; pointer-events: none;">
       <svg viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M-100 200 C 300 400, 600 -100, 1500 500" stroke="rgba(143,244,189,0.15)" stroke-width="1"/>
         <path d="M-200 800 C 400 900, 900 200, 1600 400" stroke="rgba(232,225,213,0.05)" stroke-width="1"/>
@@ -1573,10 +1659,10 @@
         </p>
 
         <div class="hero-actions" id="hero-ctas">
-          <a href="#" class="btn-solid">
-            Começar meu diagnóstico
+          <a href="#cta-section" class="btn-shiny">
+            <span>Começar meu diagnóstico</span>
           </a>
-          <a href="#" class="btn-ghost-minimal">
+          <a href="#modules-section" class="btn-ghost-minimal">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
             </svg>
@@ -1629,7 +1715,7 @@
         <h2 class="intro-title" id="intro-title">O que é a Flunex?</h2>
         <div class="intro-meta" id="intro-meta">SISTEMA MODULAR</div>
         
-        <a href="#pain-section" class="intro-link" id="intro-link">Identificar dores</a>
+        <a href="#cta-section" class="intro-link" id="intro-link">Identificar dores</a>
       </div>
       <div class="intro-right">
         <p class="intro-desc" id="intro-desc">
@@ -1732,14 +1818,6 @@
           Cada um deles pode ser contratado de forma independente. Você escolhe apenas o que precisa agora: landing page, CRM, integrações, automações, dashboards…<br><br>
           E se quiser evoluir a operação ao longo do tempo, os módulos se encaixam como uma escada natural.
         </p>
-        <div class="modules-action hidden lg:block">
-          <a href="#" class="btn-ghost-minimal modules-action-btn" style="color: var(--c-neutral-lt); border-color: rgba(232, 225, 213, 0.2);">
-            <span>Ver os Módulos</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
-            </svg>
-          </a>
-        </div>
       </div>
     </div>
 
@@ -1786,37 +1864,6 @@
          <p class="deepdive-desc">
             Cada serviço individual da Flunex resolve um problema real da sua operação. Não é preciso esperar todas as etapas para ver diferença no dia a dia.
          </p>
-         
-         <div class="deepdive-steps">
-            <div class="step-item active">
-               <div class="step-info">
-                  <span class="step-num">01</span>
-                  <span class="step-title">Diagnóstico inteligente</span>
-               </div>
-               <svg class="step-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-            </div>
-            <div class="step-item">
-               <div class="step-info">
-                  <span class="step-num">02</span>
-                  <span class="step-title">Estruturação da base (CORE)</span>
-               </div>
-               <svg class="step-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-            </div>
-            <div class="step-item">
-               <div class="step-info">
-                  <span class="step-num">03</span>
-                  <span class="step-title">Automação contínua (FLOW)</span>
-               </div>
-               <svg class="step-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-            </div>
-            <div class="step-item">
-               <div class="step-info">
-                  <span class="step-num">04</span>
-                  <span class="step-title">Inteligência aplicada (INSIGHT)</span>
-               </div>
-               <svg class="step-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-            </div>
-         </div>
       </div>
       
       <!-- Right Content: Interactive Stacked Cards -->
@@ -1855,13 +1902,13 @@
     <div class="intro-block delivery-block"> <!-- Reusing Section 2 grid classes -->
       <div class="intro-left">
         <div class="intro-eyebrow">04</div>
-        <h2 class="intro-title" style="max-width: 15ch;">Como a Flunex entrega tudo isso?</h2>
+        <h2 class="intro-title" style="max-width: 18ch;">Como a Flunex entrega tudo isso?</h2>
         <div class="intro-meta">MÃO NA MASSA</div>
         
-        <a href="#contact" class="intro-link">Iniciar projeto</a>
+        <a href="#cta-section" class="intro-link">Iniciar diagnóstico</a>
       </div>
       <div class="intro-right">
-        <p class="intro-desc">
+        <p class="intro-desc" style="max-width: 600px;">
           Nós implementamos para você. Sem você precisar aprender ferramentas, ver tutoriais ou reorganizar toda a equipe.<br><br>
           A Flunex configura, integra, automatiza e estrutura. Você só utiliza.<strong style="display:block; margin-top:2rem; font-weight:600;">Simples assim.</strong>
         </p>
@@ -1959,7 +2006,7 @@
   <section id="founder-section">
     <div class="founder-container">
       <div class="founder-image-wrapper">
-         <img src="" alt="Bruna de Lima" class="founder-img-placeholder" style="width: 100%; height: 100%; object-fit: cover; background: var(--c-primary-10);" />
+         <img src="raw_files/bruna_lima.jpeg" alt="Bruna de Lima" class="founder-img-placeholder" style="width: 100%; height: 100%; object-fit: cover; background: var(--c-primary-10);" />
          <div class="founder-glass-tag">FOUNDER_FLUNEX</div>
       </div>
       <div class="founder-content">
@@ -2001,9 +2048,9 @@
           <h2 class="cta-title">Diagnóstico Inteligente</h2>
           <div class="cta-subtitle">Receba um relatório em 24h</div>
           <p class="cta-desc">Mapeamos prioridades e indicamos o módulo (ou serviço individual) ideal para o seu momento.</p>
-          <a href="#contact" class="cta-btn">
-             Realizar meu diagnóstico
-             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          <a href="#contact" class="btn-shiny">
+             <span>Realizar meu diagnóstico
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></span>
           </a>
        </div>
     </div>
@@ -2013,7 +2060,7 @@
        FOOTER
        ============================================================ -->
   <footer id="site-footer">
-    <div class="footer-logo">FLUNEX</div>
+    <a href="#" class="footer-logo" style="display:inline-block;"><img src="raw_files/flunex_white.png" alt="Flunex Logo" style="height: 28px; width: auto;" /></a>
     <div class="footer-copy">© 2026 Flunex. Todos os direitos reservados.</div>
   </footer>
 
