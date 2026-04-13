@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Flunex — Tecnologia que te acompanha</title>
   <meta name="description" content="A Flunex estrutura processos e automatiza o que trava sua rotina, para decisões rápidas, claras e sem achismo."/>
+  <link rel="icon" type="image/png" href="raw_files/ícone_flunex.png"/>
 
   <!-- ── Fonts ── -->
   <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -1509,7 +1510,123 @@
       opacity: 1;
     }
 
-    /* Tablets / Mobile */
+    /* ============================================================
+       MODAL FORM (NEON)
+       ============================================================ */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100000;
+      display: flex; justify-content: center; align-items: center;
+      padding: 1rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s var(--ease-out);
+    }
+    .modal-overlay.active {
+      opacity: 1; pointer-events: auto;
+    }
+    .neon-form-card {
+      background: linear-gradient(145deg, #1A121D 0%, #0d0d0f 100%);
+      box-shadow: 25px 25px 50px rgba(0,0,0,0.9), inset 1px 1px 2px rgba(255,255,255,0.05), inset 0 -30px 60px rgba(143,244,189,0.05);
+      border-radius: 1.5rem;
+      width: 100%; max-width: 480px;
+      padding: 2.5rem;
+      position: relative;
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.4s var(--ease-out);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .neon-form-card::-webkit-scrollbar { width: 4px; }
+    .neon-form-card::-webkit-scrollbar-track { background: transparent; }
+    .neon-form-card::-webkit-scrollbar-thumb { background: rgba(143,244,189,0.2); border-radius: 4px; }
+
+    .modal-overlay.active .neon-form-card {
+      transform: translateY(0) scale(1);
+    }
+    .modal-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: transparent; border: none; color: rgba(255,255,255,0.5);
+      cursor: pointer; transition: color 0.3s; padding: 0.5rem;
+    }
+    .modal-close:hover { color: var(--c-accent); }
+
+    .neon-form-header {
+      text-align: center; margin-bottom: 2rem;
+    }
+    .neon-form-logo {
+      width: 48px; height: 48px; margin: 0 auto 1.5rem;
+      background: rgba(42,31,47, 0.8);
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: inset 3px 3px 8px rgba(0,0,0,0.9);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .neon-form-title {
+      font-family: var(--font-body); font-size: 1.5rem;
+      font-weight: 600; color: #fff; margin-bottom: 0.5rem;
+    }
+    .neon-form-subtitle {
+      font-family: var(--font-mono); font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--c-accent); opacity: 0.8;
+    }
+
+    .neon-input-group {
+      margin-bottom: 1.25rem;
+    }
+    .neon-label {
+      display: block; font-family: var(--font-mono);
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: rgba(143,244,189,0.8); margin-bottom: 0.5rem;
+    }
+    .neon-input, .neon-select {
+      width: 100%;
+      background: #070708;
+      box-shadow: inset 3px 3px 8px rgba(0,0,0,0.9);
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      color: #fff;
+      font-family: var(--font-body); font-size: 0.9rem;
+      transition: all 0.3s;
+      outline: none;
+    }
+    .neon-input::placeholder { color: rgba(255,255,255,0.2); }
+    .neon-input:focus, .neon-select:focus {
+      border-color: rgba(143,244,189,0.3);
+      box-shadow: inset 3px 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(143,244,189,0.1);
+    }
+    .neon-select { appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(143,244,189,0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 1rem center;
+    }
+    .neon-select option { background: #1A121D; color: #fff; }
+
+    .neon-submit-wrap { margin-top: 2rem; }
+    .neon-submit {
+      width: 100%;
+      background: #070708;
+      box-shadow: inset 3px 3px 8px rgba(0,0,0,0.9);
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .neon-submit span {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--c-accent); font-weight: 600;
+      text-shadow: 0 0 8px rgba(143,244,189,0.4);
+    }
+    .neon-submit:hover {
+      background: #0a0a0c; border-color: rgba(143,244,189,0.2);
+    }
+    .neon-submit:hover span {
+      text-shadow: 0 0 12px rgba(143,244,189,0.8);
+    }
     @media (max-width: 1024px) {
       #hero-content {
         grid-template-columns: 1fr;
@@ -1576,12 +1693,26 @@
 
     }
     @media (max-width: 600px) {
-      #hero-h1 { font-size: clamp(3rem, 12vw, 4rem); }
-      .hero-actions { flex-direction: column; align-items: flex-start; }
-      .visual-card { aspect-ratio: 4/3; }
+      /* Typography & Flow */
+      #hero-h1 { font-size: clamp(2.8rem, 12vw, 4rem); }
+      #main-nav { padding: 1.5rem 1.5rem; }
+      .nav-logo img { height: 24px !important; }
       
+      /* Buttons and Actions */
+      .hero-actions { flex-direction: column; align-items: stretch; gap: 1rem; width: 100%; }
+      .btn-shiny { width: 100%; justify-content: center; padding: 1.15rem 1.5rem; font-size: 0.85rem; }
+      .btn-ghost-minimal { width: 100%; justify-content: center; }
+      
+      /* Visual Adjustments */
+      .visual-card { aspect-ratio: 4/3; }
       .pain-grid { grid-template-columns: 1fr; border-right: 1px solid rgba(42, 31, 47, 0.1); }
       .pain-card { border-right: none; aspect-ratio: auto; min-height: 180px; }
+      
+      /* Final CTA Card */
+      #cta-section { padding: 6rem 1.5rem 8rem; }
+      .cta-glass-card { padding: 3rem 1.5rem; }
+      .cta-title { font-size: clamp(2rem, 8vw, 2.5rem); }
+      .cta-desc { font-size: 0.95rem; }
     }
   </style>
 </head>
@@ -1660,7 +1791,7 @@
 
         <div class="hero-actions" id="hero-ctas">
           <a href="#cta-section" class="btn-shiny">
-            <span>Começar meu diagnóstico</span>
+            <span>Quero mais informações</span>
           </a>
           <a href="#modules-section" class="btn-ghost-minimal">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1874,21 +2005,18 @@
                <div><span class="card-module-tag">FLUNEX CORE</span></div>
                <h3 class="card-stack-title">A base que organiza tudo, mesmo começando pequena.</h3>
                <p class="card-stack-desc">Estruturamos presença digital, fluxos comerciais, rastreabilidade de dados, páginas, sites e primeiras automações para eliminar o improviso do dia a dia. De uma landing page ou CRM isolado à estrutura completa, você escolhe.</p>
-               <a href="#" class="card-stack-link">Ver detalhes do CORE <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
             </div>
             <!-- Card 2 (Middle) -->
             <div class="card-stack-item">
                <div><span class="card-module-tag">FLUNEX FLOW</span></div>
                <h3 class="card-stack-title">Automação prática que reduz trabalho manual.</h3>
                <p class="card-stack-desc">Bots operacionais, integrações entre plataformas, fluxos inteligentes e redução de tarefas manuais. Sua operação finalmente flui sozinha.</p>
-               <a href="#" class="card-stack-link">Ver detalhes do FLOW <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
             </div>
             <!-- Card 3 (Back) -->
             <div class="card-stack-item">
                <div><span class="card-module-tag">FLUNEX INSIGHT</span></div>
                <h3 class="card-stack-title">Clareza para decisões.</h3>
                <p class="card-stack-desc">Dashboards inteligentes, leitura profunda da operação, identificação de gargalos e indicadores que mostram exatamente onde agir. Perfeito para quem já opera de forma estruturada, mas precisa enxergar com nitidez.</p>
-               <a href="#" class="card-stack-link">Ver detalhes do INSIGHT <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
             </div>
          </div>
       </div>
@@ -2045,11 +2173,11 @@
              <!-- Small crown/star icon mimicking reference -->
              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
           </div>
-          <h2 class="cta-title">Diagnóstico Inteligente</h2>
-          <div class="cta-subtitle">Receba um relatório em 24h</div>
+          <h2 class="cta-title">Soluções sob medida</h2>
+          <div class="cta-subtitle">Dar o próximo passo leva menos de um minuto</div>
           <p class="cta-desc">Mapeamos prioridades e indicamos o módulo (ou serviço individual) ideal para o seu momento.</p>
           <a href="#contact" class="btn-shiny">
-             <span>Realizar meu diagnóstico
+             <span>Receber mais informações
              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></span>
           </a>
        </div>
@@ -2063,6 +2191,70 @@
     <a href="#" class="footer-logo" style="display:inline-block;"><img src="raw_files/flunex_white.png" alt="Flunex Logo" style="height: 28px; width: auto;" /></a>
     <div class="footer-copy">© 2026 Flunex. Todos os direitos reservados.</div>
   </footer>
+
+  <!-- ============================================================
+       MODAL FORM (LEAD CAPTURE)
+       ============================================================ -->
+  <div id="lead-modal" class="modal-overlay">
+    <div class="neon-form-card" data-lenis-prevent>
+      <button class="modal-close" id="modal-close-btn" aria-label="Fechar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      <div class="neon-form-header">
+        <div class="neon-form-logo">
+           <img src="raw_files/flunex_white.png" alt="Flunex Logo" style="height: 18px; width: auto; opacity: 0.8;" />
+        </div>
+        <h2 class="neon-form-title">Soluções sob medida</h2>
+        <p class="neon-form-subtitle">Entraremos em contato com você</p>
+      </div>
+      <form id="lead-form">
+        
+        <div class="neon-input-group">
+          <input type="text" id="form-name" class="neon-input" placeholder="Qual seu nome e sobrenome?" required>
+        </div>
+
+        <div class="neon-input-group">
+          <input type="tel" id="form-whatsapp" class="neon-input" placeholder="Qual seu WhatsApp?" maxlength="15" required>
+        </div>
+
+        <div class="neon-input-group">
+          <input type="email" id="form-email" class="neon-input" placeholder="Qual seu melhor e-mail?" required>
+        </div>
+
+        <div class="neon-input-group">
+          <input type="text" id="form-company" class="neon-input" placeholder="Qual nome da empresa?" required>
+        </div>
+
+        <div class="neon-input-group">
+          <select id="form-need" class="neon-select" required>
+            <option value="" disabled selected>O que você busca hoje?</option>
+            <option value="diagnostico">Quero receber um diagnóstico geral e mapear gargalos na operação</option>
+            <option value="recomendacao">Quero uma recomendação de serviço para uma área específica</option>
+            <option value="orcamento">Já sei o que preciso e quero orçamento de um serviço específico</option>
+          </select>
+        </div>
+
+        <div class="neon-input-group">
+          <select id="form-role" class="neon-select" required>
+            <option value="" disabled selected>Quem está respondendo este formulário?</option>
+            <option value="dono">Sou dono(a) ou fundador(a)</option>
+            <option value="direcao">Sou gestor(a) geral / direção</option>
+            <option value="area">Sou gestor(a) de área</option>
+            <option value="analista">Sou analista / coordenador(a) responsável pela operação</option>
+          </select>
+        </div>
+
+        <div class="neon-submit-wrap">
+          <button type="submit" class="neon-submit">
+            <span>Receber mais informações</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-accent)" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
 
   <!-- ============================================================
        JAVASCRIPT
@@ -2207,6 +2399,76 @@
              if(cards.length > 0) stackWrapper.appendChild(cards[0]);
           });
         });
+      }
+      // 8. Modal Pop-up Logic & Mask
+      const modal = document.getElementById('lead-modal');
+      const closeBtn = document.getElementById('modal-close-btn');
+
+      // Add functionality to ANY link mapped to #contact (or specifically section 9 CTA)
+      const openModalBtns = document.querySelectorAll('a[href="#contact"]');
+      openModalBtns.forEach(btn => {
+         btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.classList.add('active');
+         });
+      });
+
+      // Close modal events
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+      }
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+
+      // Simple WhatsApp DDD Masking: (00) 00000-0000
+      const phoneInput = document.getElementById('form-whatsapp');
+      if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+            e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+        });
+      }
+      // 9. Google Forms Transparent Integration
+      const leadForm = document.getElementById('lead-form');
+      if (leadForm) {
+         leadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = leadForm.querySelector('button[type="submit"] span');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'ENVIANDO...';
+
+            const formData = new URLSearchParams();
+            // Mapeamento exato fornecido pelo usuário
+            formData.append('entry.434663847', document.getElementById('form-name').value);
+            formData.append('entry.322011966', document.getElementById('form-whatsapp').value);
+            formData.append('entry.1181661335', document.getElementById('form-email').value);
+            formData.append('entry.967209447', document.getElementById('form-company').value);
+            
+            // Extraindo o texto extenso da opção selecionada para enviar ao Google Sheets certinho
+            const needSelect = document.getElementById('form-need');
+            formData.append('entry.183704777', needSelect.options[needSelect.selectedIndex].text);
+            
+            const roleSelect = document.getElementById('form-role');
+            formData.append('entry.1629352538', roleSelect.options[roleSelect.selectedIndex].text);
+
+            fetch('https://docs.google.com/forms/d/e/1FAIpQLScLd9VsWXRURceFM7f3FDklhtWk5Smgc0BiolFRKAXqUVM1SA/formResponse', {
+               method: 'POST',
+               mode: 'no-cors',
+               headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+               body: formData.toString()
+            }).then(() => {
+               submitBtn.innerText = originalText;
+               alert('Formulário enviado com sucesso! Entraremos em contato em breve.');
+               modal.classList.remove('active');
+               leadForm.reset();
+            }).catch((err) => {
+               submitBtn.innerText = originalText;
+               alert('Ocorreu um erro ao enviar. Tente novamente.');
+               console.error('Submission error:', err);
+            });
+         });
       }
 
     });
